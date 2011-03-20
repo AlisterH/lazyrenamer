@@ -1,0 +1,8 @@
+----------------
+LazyRenamer v1.1
+
+- Fix bug where error "files appears to be in use by another program" is produced if the path of the containing directory includes a .
+- Add "copy" button
+- Show four lines of file path (three is not enough).
+
+----------------
