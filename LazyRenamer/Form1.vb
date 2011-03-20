@@ -76,17 +76,18 @@ Public Class Form1
         If InStr(FileName, ".") <> 0 Then FileName = VB.Left(FileName, InStr(FileName, ".") - 1)
         FileNameTxtbox = VB.Right(txtNewName.Text, VB.Len(txtNewName.Text) - InStrRev(txtNewName.Text, "\"))
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
-            FilesInDir = VB.Right(foundFile, VB.Len(foundFile) - InStrRev(foundFile, "\"))
-            If InStr(FilesInDir, ".") <> 0 Then FilesInDir = VB.Left(FilesInDir, InStr(FilesInDir, ".") - 1)
+            foundFile = VB.Right(foundFile, VB.Len(foundFile) - InStrRev(foundFile, "\"))
+            If InStr(foundFile, ".") <> 0 Then FilesInDir = VB.Left(foundFile, InStr(foundFile, ".") - 1)
             If FileNameTxtbox <> FileName Then
                 If LCase(FilesInDir) = LCase(FileName) Then
                     If InStr(foundFile, ".") <> 0 Then
                         foundFileExtension = VB.Right(foundFile, VB.Len(foundFile) - InStrRev(foundFile, ".") + 1)
                         On Error GoTo 100   'If file is in use by another program
                         If InStr(foundFile, ".") = InStrRev(foundFile, ".") Then
-                            Rename(foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp")
-                            ' Renames files with more-than-one dot, e.g. Land.shp.xml in a Land.*-series
-                        Else : Rename(foundFile, FilePath & FileNameTxtbox & VB.Mid(foundFile, InStr(foundFile, "."), (InStrRev(foundFile, ".") - InStr(foundFile, "."))) & foundFileExtension & "#tmp")
+                            Rename(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp")
+                        Else
+                            'Renames files with more-than-one dot, e.g. Land.shp.xml in a Land.*-series
+                            Rename(FilePath & foundFile, FilePath & FileNameTxtbox & VB.Mid(foundFile, InStr(foundFile, "."), (InStrRev(foundFile, ".") - InStr(foundFile, "."))) & foundFileExtension & "#tmp")
                         End If
                     End If
                 End If
