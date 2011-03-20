@@ -45,6 +45,7 @@ Public Class Form1
         FileExtension = VB.Right(FileDrop, VB.Len(FileDrop) - InStrRev(FileDrop, ".") + 1)
         lblFile.Text = FileDrop
         txtNewName.Text = FileName
+        txtNewName.Focus()
         btnRename.Enabled = False
         btnCopy.Enabled = False
     End Sub
