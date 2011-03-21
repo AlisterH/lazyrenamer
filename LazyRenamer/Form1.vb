@@ -53,15 +53,6 @@ Public Class Form1
         'Prevents user from entering illegal file name characters in textbox
         If e.KeyChar = ChrW(44) Or e.KeyChar = ChrW(46) Or e.KeyChar = ChrW(34) Or e.KeyChar = ChrW(42) Or e.KeyChar = ChrW(47) Or e.KeyChar = ChrW(92) Or e.KeyChar = ChrW(58) Or e.KeyChar = ChrW(60) Or e.KeyChar = ChrW(62) Or e.KeyChar = ChrW(63) Then e.Handled = True
     End Sub
-    Private Sub txtNewName_KeyDown(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles txtNewName.KeyDown
-        'Ad hoc way to let btnRename be the default key when user is typing in the txtNewName textbox
-        If e.KeyCode = Keys.Enter Then
-            If btnRename.Enabled = True Then
-                btnRename.Focus()
-                SendKeys.Send("{ENTER}")
-            End If
-        End If
-    End Sub
     Private Sub txtNewName_KeyUp(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles txtNewName.KeyUp
         btnRename.Enabled = True
         btnCopy.Enabled = True
