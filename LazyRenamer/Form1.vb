@@ -36,13 +36,11 @@ Public Class Form1
         'Determines the path, name and extension of the dropped file
         FilePath = VB.Left(FileDrop, InStrRev(FileDrop, "\"))
         FileName = VB.Right(FileDrop, VB.Len(FileDrop) - InStrRev(FileDrop, "\"))
-        If InStr(FileName, ".") = 0 Then
-            lblFile.Text = "File extension missing"
-            txtNewName.Enabled = False
+        If InStr(FileName, ".") <> 0 Then
+            FileNameDot = FileName
+            FileName = VB.Left(FileName, InStr(FileName, ".") - 1)
+            FileExtension = VB.Right(FileDrop, VB.Len(FileDrop) - InStrRev(FileDrop, ".") + 1)
         End If
-        FileNameDot = FileName
-        FileName = VB.Left(FileName, InStr(FileName, ".") - 1)
-        FileExtension = VB.Right(FileDrop, VB.Len(FileDrop) - InStrRev(FileDrop, ".") + 1)
         lblFile.Text = FileDrop
         txtNewName.Text = FileName
         txtNewName.Focus()
@@ -74,17 +72,23 @@ Public Class Form1
         FileNameTxtbox = VB.Right(txtNewName.Text, VB.Len(txtNewName.Text) - InStrRev(txtNewName.Text, "\"))
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
             foundFile = VB.Right(foundFile, VB.Len(foundFile) - InStrRev(foundFile, "\"))
-            If InStr(foundFile, ".") <> 0 Then FilesInDir = VB.Left(foundFile, InStr(foundFile, ".") - 1)
-            If FileNameTxtbox <> FileName Then
-                If LCase(FilesInDir) = LCase(FileName) Then
-                    If InStr(foundFile, ".") <> 0 Then
+            If InStr(foundFile, ".") = 0 Then
+                If LCase(foundFile) = LCase(FileName) Then
+                    'Renames file that doesn't have an extension e.g. "Land" in a Land.*-series
+                    Rename(FilePath & foundFile, FilePath & FileNameTxtbox & "#tmp") 'Do we really need the #tmp?  What situations does it save us in?
+                End If
+            Else
+                FilesInDir = VB.Left(foundFile, InStr(foundFile, ".") - 1)
+                If FileNameTxtbox <> FileName Then
+                    If LCase(FilesInDir) = LCase(FileName) Then
                         foundFileExtension = VB.Right(foundFile, VB.Len(foundFile) - InStrRev(foundFile, ".") + 1)
                         On Error GoTo 100   'If file is in use by another program
                         If InStr(foundFile, ".") = InStrRev(foundFile, ".") Then
-                            Rename(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp")
+                            'Renames files with a single dot, e.g. "Land.shp" in a Land.*-series
+                            Rename(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp") 'Do we really need the #tmp?  What situations does it save us in?
                         Else
-                            'Renames files with more-than-one dot, e.g. Land.shp.xml in a Land.*-series
-                            Rename(FilePath & foundFile, FilePath & FileNameTxtbox & VB.Mid(foundFile, InStr(foundFile, "."), (InStrRev(foundFile, ".") - InStr(foundFile, "."))) & foundFileExtension & "#tmp")
+                            'Renames files with more-than-one dot, e.g. "Land.shp.xml" in a Land.*-series
+                            Rename(FilePath & foundFile, FilePath & FileNameTxtbox & VB.Mid(foundFile, InStr(foundFile, "."), (InStrRev(foundFile, ".") - InStr(foundFile, "."))) & foundFileExtension & "#tmp") 'Do we really need the #tmp?  What situations does it save us in?
                         End If
                     End If
                 End If
@@ -130,9 +134,12 @@ Public Class Form1
         If lblFile.Text <> "One or more of the associated files appears to be in use by another program. Aborting." Then
             lblFile.BackColor = Color.WhiteSmoke
             'Updates lblfile.text with the new name ...
-            If FileNameDot <> FileName Then
+            If InStr(FileName, ".") = 0 Then
+                lblFile.Text = FilePath & txtNewName.Text
+            ElseIf FileNameDot <> FileName Then
                 lblFile.Text = FilePath & txtNewName.Text & VB.Mid(FileNameDot, InStr(FileNameDot, "."), VB.Len(FileNameDot))
-            Else : lblFile.Text = FilePath & txtNewName.Text & FileExtension
+            Else
+                lblFile.Text = FilePath & txtNewName.Text & FileExtension
             End If
         End If
     End Sub
@@ -144,18 +151,24 @@ Public Class Form1
         FileNameTxtbox = VB.Right(txtNewName.Text, VB.Len(txtNewName.Text) - InStrRev(txtNewName.Text, "\"))
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
             foundFile = VB.Right(foundFile, VB.Len(foundFile) - InStrRev(foundFile, "\"))
-            If InStr(foundFile, ".") <> 0 Then FilesInDir = VB.Left(foundFile, InStr(foundFile, ".") - 1)
-            'foundFile is a full path (it goes through all the files in the folder)
-            'FilesInDir is a filename without extensions (it goes through all the files in the folder)
-            If FileNameTxtbox <> FileName Then
-                If LCase(FilesInDir) = LCase(FileName) Then
-                    If InStr(foundFile, ".") <> 0 Then
+            If InStr(foundFile, ".") = 0 Then
+                If LCase(foundFile) = LCase(FileName) Then
+                    'Copies file that doesn't have an extension e.g. "Land" in a Land.*-series
+                    My.Computer.FileSystem.CopyFile(FilePath & foundFile, FilePath & FileNameTxtbox)
+                End If
+            Else
+                FilesInDir = VB.Left(foundFile, InStr(foundFile, ".") - 1)
+                If InStr(foundFile, ".") <> 0 Then FilesInDir = VB.Left(foundFile, InStr(foundFile, ".") - 1)
+                If FileNameTxtbox <> FileName Then
+                    If LCase(FilesInDir) = LCase(FileName) Then
                         foundFileExtension = VB.Right(foundFile, VB.Len(foundFile) - InStrRev(foundFile, ".") + 1)
-                        On Error GoTo 100   'Shouldn't get an error copying
+                        On Error GoTo 100   'Shouldn't get an error copying, should we?
                         If InStr(foundFile, ".") = InStrRev(foundFile, ".") Then
+                            'Copies files with a single dot, e.g. "Land.shp" in a Land.*-series
                             My.Computer.FileSystem.CopyFile(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension)
-                            'Renames files with more-than-one dot, e.g. Land.shp.xml in a Land.*-series
-                        Else : My.Computer.FileSystem.CopyFile(FilePath & foundFile, FilePath & FileNameTxtbox & VB.Mid(foundFile, InStr(foundFile, "."), (InStrRev(foundFile, ".") - InStr(foundFile, "."))) & foundFileExtension)
+                        Else
+                            'Copies files with more-than-one dot, e.g. "Land.shp.xml" in a Land.*-series
+                            My.Computer.FileSystem.CopyFile(FilePath & foundFile, FilePath & FileNameTxtbox & VB.Mid(foundFile, InStr(foundFile, "."), (InStrRev(foundFile, ".") - InStr(foundFile, "."))) & foundFileExtension)
                         End If
                     End If
                 End If
@@ -170,7 +183,7 @@ Public Class Form1
 100:    'Jumps here when "On Error" occurs
         lblFile.Text = "Aborting. This seems to be a bug!"
         lblFile.BackColor = Color.LavenderBlush
-110:    'Hmmm.  What happens if an error occurs while copying?
+110:    'Hmmm.  What happens if an error occurs while copying?  Is it possible?
         'Updates the Layer Name value in MapWindow layer properties files
         MwsrFileIn = FilePath & txtNewName.Text & ".mwsr"
         If File.Exists(MwsrFileIn) Then
@@ -198,9 +211,12 @@ Public Class Form1
         If lblFile.Text <> "One or more of the associated files appears to be in use by another program. Aborting." Then
             lblFile.BackColor = Color.WhiteSmoke
             'Updates lblfile.text with the new name ...
-            If FileNameDot <> FileName Then
+            If InStr(FileName, ".") = 0 Then
+                lblFile.Text = FilePath & txtNewName.Text
+            ElseIf FileNameDot <> FileName Then
                 lblFile.Text = FilePath & txtNewName.Text & VB.Mid(FileNameDot, InStr(FileNameDot, "."), VB.Len(FileNameDot))
-            Else : lblFile.Text = FilePath & txtNewName.Text & FileExtension
+            Else
+                lblFile.Text = FilePath & txtNewName.Text & FileExtension
             End If
         End If
     End Sub
