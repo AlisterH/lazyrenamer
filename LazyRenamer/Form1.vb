@@ -64,6 +64,14 @@ Public Class Form1
                 btnCopy.Enabled = False
             End If
         Next
+        For Each foundFile As String In My.Computer.FileSystem.GetDirectories(FilePath)
+            FilesInDir = VB.Right(foundFile, VB.Len(foundFile) - InStrRev(foundFile, "\"))
+            If InStr(FilesInDir, ".") <> 0 Then FilesInDir = VB.Left(FilesInDir, InStr(FilesInDir, ".") - 1)
+            If LCase(txtNewName.Text) = LCase(FilesInDir) Then
+                btnRename.Enabled = False
+                btnCopy.Enabled = False
+            End If
+        Next
     End Sub
     Private Sub btnRename_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnRename.Click
         'Rename associated files
