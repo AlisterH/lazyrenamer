@@ -32,8 +32,7 @@ For example, if you have a bundle of files called:
    Land.lbl,
 To rename all the files at once simply drag one of them onto the program, type the new name, and press [enter].
 To copy all the files instead, press [tab] and then [enter].
-
-LazyRenamer also updates the Layer Name attribute in MapWindow MWSR files.
+As you type the new name LazyRenamer checks for existing files or directories with the same base name, to avoid any conflicts or confusion.
 
 Lazyrenamer can handle files with multiple extensions - useful when you have sets of files that keep growing like this:
    Sails.stc.dwh.01.bak
@@ -51,4 +50,14 @@ Lazyrenamer can handle files with multiple extensions - useful when you have set
    Sails.stc.01.bak
    Sails.stc.dwh
 
+LazyRenamer will also rename a matching file with no extension, but will not currently rename directories.
+LazyRenamer also updates the Layer Name attribute in MapWindow MWSR files.
+
 Microsoft .NET Framework 2.0 or later is required to run this program.
+
+
+----------------
+
+New developers wanted
+I am not really a developer, and this program isn't a priority for me, so I won't be doing a lot of improvements.
+Just ask if you want to be added to the project. 
