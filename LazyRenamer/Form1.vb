@@ -17,12 +17,14 @@
 '    You should have received a copy of the GNU General Public License
 '    along with LazyRenamer.  If not, see <http://www.gnu.org/licenses/>.
 
-' Note 1: Windows filesystems are not truly case-sensitive: they allow paths/names to be displayed in a case sensitive manner, but otherwise
-' paths are treated case-insensitively i.e. there cannot be both c:\Test.shp and c:\test.shp.
-' We cater to this lowest-common-denominator behaviour:
-' e.g. we won't allow creating test.* if Test.* exists
-' e.g. we rename both Test.shp and test.shp.
-' Oh dear!  Because of the latter, it fails if the set of files we are renaming includes both test.shp and Test.shp
+' Note 1: Windows programs/filesystems are not truly case-sensitive: they allow paths/names to be displayed in a case sensitive manner, 
+' but otherwise paths are treated case-insensitively i.e. there cannot be both c:\Test.shp and c:\test.shp.
+' We partly cater to this lowest-common-denominator behaviour:
+' e.g. we won't allow creating "test.*" if "Test.*" exists
+' Note 2: But since version 1.2 we only rename or copy the files with basenames which match the selected file _case sensitively_.
+' This is because otherwise we fail if the set of files we are renaming includes two files that only differ by the case of some characters
+' e.g. we would try to give the same new name to both "test.shp" and "Test.shp"
+' On Windows this situation is unlikely but possible e.g. accessing files on a Samba server which were named from a Linux system.
 
 Imports VB = Microsoft.VisualBasic
 Imports System.IO
@@ -33,7 +35,7 @@ Public Class Form1
     Dim foundFileExtension As String, foundFileReadOnly As System.IO.FileInfo
     Dim line As String, startposX As Integer, startposY As Integer
     
-    'N.B. don't need to use Path.DirectorySeparatorChar because even though Windows has \ as directory separator, it also accepts /
+    'Hack: we don't need to use Path.DirectorySeparatorChar because even though Windows has \ as directory separator, it also accepts /
     Dim IniFile As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "/LazyRenamer.ini"
     
     Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
@@ -65,7 +67,7 @@ Public Class Form1
         lblFile.Text = FileDrop
         txtNewName.Enabled = True
         'Determines the path, name and extension of the dropped file
-        'Shouldn/t something like this work, too?
+        'Shouldn't something like this work, too?
         'FilePath = Path.Combine(Path.GetDirectoryName(FileDrop),Path.DirectorySeparatorChar)
         FilePath = VB.Left(FileDrop, InStrRev(FileDrop, Path.DirectorySeparatorChar))
         FileName = Path.GetFileName(FileDrop)
@@ -97,7 +99,7 @@ Public Class Form1
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
             FilesInDir = Path.GetFileName(foundFile)
             If InStr(FilesInDir, ".") <> 0 Then FilesInDir = VB.Left(FilesInDir, InStr(FilesInDir, ".") - 1)
-            If LCase(txtNewName.Text) = LCase(FilesInDir) Then 'it might be a windows filesystem (see note 1 at top)
+            If LCase(txtNewName.Text) = LCase(FilesInDir) Then 'case insensitive as it might be a windows filesystem (see note 1 at top)
                 btnRename.Enabled = False
                 btnCopy.Enabled = False
             End If
@@ -105,7 +107,7 @@ Public Class Form1
         For Each foundFile As String In My.Computer.FileSystem.GetDirectories(FilePath)
             FilesInDir = Path.GetFileName(foundFile)
             If InStr(FilesInDir, ".") <> 0 Then FilesInDir = VB.Left(FilesInDir, InStr(FilesInDir, ".") - 1)
-            If LCase(txtNewName.Text) = LCase(FilesInDir) Then 'it might be a windows filesystem (see note 1 at top)
+            If LCase(txtNewName.Text) = LCase(FilesInDir) Then 'case insensitive as it might be a windows filesystem (see note 1 at top)
                 btnRename.Enabled = False
                 btnCopy.Enabled = False
             End If
@@ -119,14 +121,14 @@ Public Class Form1
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
             foundFile = Path.GetFileName(foundFile)
             If InStr(foundFile, ".") = 0 Then
-                If LCase(foundFile) = LCase(FileName) Then 'it might be a windows filesystem (see note 1 at top)
+                If foundFile = FileName Then 'need to be case sensitive here as it might not be a windows filesystem (see note 2 at top)
                     'Renames file that doesn't have an extension e.g. "Land" in a Land.*-series
                     Rename(FilePath & foundFile, FilePath & FileNameTxtbox & "#tmp") 'Do we really need the #tmp?  What situations does it save us in?
                 End If
             Else
                 FilesInDir = VB.Left(foundFile, InStr(foundFile, ".") - 1)
                 If FileNameTxtbox <> FileName Then
-                    If LCase(FilesInDir) = LCase(FileName) Then 'it might be a windows filesystem (see note 1 at top)
+                    If FilesInDir = FileName Then 'need to be case sensitive here as it might not be a windows filesystem (see note 2 at top)
                         foundFileExtension = VB.Right(foundFile, VB.Len(foundFile) - InStrRev(foundFile, ".") + 1)
                         On Error GoTo 100   'If file is in use by another program
                         If InStr(foundFile, ".") = InStrRev(foundFile, ".") Then
@@ -198,7 +200,7 @@ Public Class Form1
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
             foundFile = Path.GetFileName(foundFile)
             If InStr(foundFile, ".") = 0 Then
-                If LCase(foundFile) = LCase(FileName) Then 'it might be a windows filesystem (see note 1 at top)
+                If foundFile = FileName Then 'need to be case sensitive here as it might not be a windows filesystem (see note 2 at top)
                     'Copies file that doesn't have an extension e.g. "Land" in a Land.*-series
                     My.Computer.FileSystem.CopyFile(FilePath & foundFile, FilePath & FileNameTxtbox)
                 End If
@@ -206,7 +208,7 @@ Public Class Form1
                 FilesInDir = VB.Left(foundFile, InStr(foundFile, ".") - 1)
                 If InStr(foundFile, ".") <> 0 Then FilesInDir = VB.Left(foundFile, InStr(foundFile, ".") - 1)
                 If FileNameTxtbox <> FileName Then
-                    If LCase(FilesInDir) = LCase(FileName) Then 'it might be a windows filesystem (see note 1 at top)
+                    If FilesInDir = FileName Then 'need to be case sensitive here as it might not be a windows filesystem (see note 2 at top)
                         foundFileExtension = VB.Right(foundFile, VB.Len(foundFile) - InStrRev(foundFile, ".") + 1)
                         On Error GoTo 100   'Shouldn't get an error copying, should we?
                         If InStr(foundFile, ".") = InStrRev(foundFile, ".") Then
