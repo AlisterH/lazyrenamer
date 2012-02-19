@@ -1,7 +1,7 @@
-LazyRenamer v1.1
+LazyRenamer v1.2
 
 ----------------
-'    Copyright © Alister Hood, 2011
+'    Copyright © Alister Hood, 2011, 2012
 '
 '    This file is part of LazyRenamer.
 '    http://code.google.com/p/lazyrenamer
@@ -53,7 +53,7 @@ Lazyrenamer can handle files with multiple extensions - useful when you have set
 LazyRenamer will also rename a matching file with no extension, but will not currently rename directories.
 LazyRenamer also updates the Layer Name attribute in MapWindow MWSR files.
 
-Microsoft .NET Framework 2.0 or later is required to run this program.
+Either the open source and cross platform Mono runtime OR Microsoft .NET Framework 2.0 or later is required to run this program.
 
 
 ----------------
