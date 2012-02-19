@@ -32,7 +32,7 @@ Namespace My
         
         <Global.System.Diagnostics.DebuggerStepThroughAttribute()>  _
         Protected Overrides Sub OnCreateMainForm()
-            Me.MainForm = Global.LazyRenamer.Form1
+            Me.MainForm = New Global.LazyRenamer.Form1
         End Sub
     End Class
 End Namespace
