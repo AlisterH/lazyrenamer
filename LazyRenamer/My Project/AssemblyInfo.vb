@@ -12,7 +12,7 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyDescription("Quickly rename or copy a group of associated files")> 
 <Assembly: AssemblyCompany("")> 
 <Assembly: AssemblyProduct("LazyRenamer")> 
-<Assembly: AssemblyCopyright("Copyright ©  2008, 2011")> 
+<Assembly: AssemblyCopyright("Copyright ©  2008, 2011, 2012")> 
 <Assembly: AssemblyTrademark("")> 
 
 <Assembly: ComVisible(False)>
@@ -31,5 +31,5 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("1.1.0.0")> 
-<Assembly: AssemblyFileVersion("1.1.0.0")> 
+<Assembly: AssemblyVersion("1.1.1.0")> 
+<Assembly: AssemblyFileVersion("1.1.1.0")> 
