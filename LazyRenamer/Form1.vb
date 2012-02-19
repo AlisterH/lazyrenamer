@@ -1,5 +1,5 @@
 
-'    Copyright © Alister Hood, 2011
+'    Copyright © Alister Hood, 2011, 2012
 '
 '    This file is part of LazyRenamer.
 '    http://code.google.com/p/lazyrenamer
@@ -17,6 +17,12 @@
 '    You should have received a copy of the GNU General Public License
 '    along with LazyRenamer.  If not, see <http://www.gnu.org/licenses/>.
 
+' Note 1: Windows filesystems are not truly case-sensitive: they allow paths/names to be displayed in a case sensitive manner, but otherwise
+' paths are treated case-insensitively i.e. there cannot be both c:\Test.shp and c:\test.shp.
+' We cater to this lowest-common-denominator behaviour:
+' e.g. we won't allow creating test.* if Test.* exists
+' e.g. we rename both Test.shp and test.shp.
+' Oh dear!  Because of the latter, it fails if the set of files we are renaming includes both test.shp and Test.shp
 
 Imports VB = Microsoft.VisualBasic
 Imports System.IO
@@ -26,10 +32,15 @@ Public Class Form1
     Dim TestIfExist As String, FileNameDot As String, BatchFile As String, FilesInDir As String, FileNameTxtbox As String
     Dim foundFileExtension As String, foundFileReadOnly As System.IO.FileInfo
     Dim line As String, startposX As Integer, startposY As Integer
+    
+    'N.B. don't need to use Path.DirectorySeparatorChar because even though Windows has \ as directory separator, it also accepts /
+    Dim IniFile As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "/LazyRenamer.ini"
+    
     Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         'Restores the program position of the last LazyRenamer session
-        If File.Exists(CurDir() & "\LazyRenamer.ini") = True Then
-            FileOpen(1, CurDir() & "\LazyRenamer.ini", OpenMode.Input)
+        'Looks like this doesn't work with some window managers
+        If File.Exists(IniFile) = True Then
+            FileOpen(1, IniFile, OpenMode.Input)
             On Error GoTo 10
             LineInput(1)
             'The X coordinate
@@ -54,8 +65,12 @@ Public Class Form1
         lblFile.Text = FileDrop
         txtNewName.Enabled = True
         'Determines the path, name and extension of the dropped file
-        FilePath = VB.Left(FileDrop, InStrRev(FileDrop, "\"))
-        FileName = VB.Right(FileDrop, VB.Len(FileDrop) - InStrRev(FileDrop, "\"))
+        'Shouldn/t something like this work, too?
+        'FilePath = Path.Combine(Path.GetDirectoryName(FileDrop),Path.DirectorySeparatorChar)
+        FilePath = VB.Left(FileDrop, InStrRev(FileDrop, Path.DirectorySeparatorChar))
+        FileName = Path.GetFileName(FileDrop)
+        'Note we can't use Path.GetExtension() because it handles files with multiple extensions incorrectly
+        'Files with multiple extensions are probably more common in fields where we would use lazyrename than are random dots in the middle of a name.
         If InStr(FileName, ".") <> 0 Then
             FileNameDot = FileName
             FileName = VB.Left(FileName, InStr(FileName, ".") - 1)
@@ -69,6 +84,9 @@ Public Class Form1
     End Sub
     Private Sub txtNewName_KeyPress(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyPressEventArgs) Handles txtNewName.KeyPress
         'Prevents user from entering illegal file name characters in textbox
+        'N.B. Depending on the filesystem these may not all be illegal, but we can't check against Path.GetInvalidPathChars(), as this does 
+        'not actually check what characters are illegal on the particular filesystem we are writing to.
+        'so we restrict characters to the lowest-common-denominator: Windows
         If e.KeyChar = ChrW(44) Or e.KeyChar = ChrW(46) Or e.KeyChar = ChrW(34) Or e.KeyChar = ChrW(42) Or e.KeyChar = ChrW(47) Or e.KeyChar = ChrW(92) Or e.KeyChar = ChrW(58) Or e.KeyChar = ChrW(60) Or e.KeyChar = ChrW(62) Or e.KeyChar = ChrW(63) Then e.Handled = True
     End Sub
     Private Sub txtNewName_KeyUp(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles txtNewName.KeyUp
@@ -77,17 +95,17 @@ Public Class Form1
         If Trim(txtNewName.Text) = "" Then btnRename.Enabled = False
         'Disables the Rename and Copy buttons if any file with that name and any extension already exists
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
-            FilesInDir = VB.Right(foundFile, VB.Len(foundFile) - InStrRev(foundFile, "\"))
+            FilesInDir = Path.GetFileName(foundFile)
             If InStr(FilesInDir, ".") <> 0 Then FilesInDir = VB.Left(FilesInDir, InStr(FilesInDir, ".") - 1)
-            If LCase(txtNewName.Text) = LCase(FilesInDir) Then
+            If LCase(txtNewName.Text) = LCase(FilesInDir) Then 'it might be a windows filesystem (see note 1 at top)
                 btnRename.Enabled = False
                 btnCopy.Enabled = False
             End If
         Next
         For Each foundFile As String In My.Computer.FileSystem.GetDirectories(FilePath)
-            FilesInDir = VB.Right(foundFile, VB.Len(foundFile) - InStrRev(foundFile, "\"))
+            FilesInDir = Path.GetFileName(foundFile)
             If InStr(FilesInDir, ".") <> 0 Then FilesInDir = VB.Left(FilesInDir, InStr(FilesInDir, ".") - 1)
-            If LCase(txtNewName.Text) = LCase(FilesInDir) Then
+            If LCase(txtNewName.Text) = LCase(FilesInDir) Then 'it might be a windows filesystem (see note 1 at top)
                 btnRename.Enabled = False
                 btnCopy.Enabled = False
             End If
@@ -95,20 +113,20 @@ Public Class Form1
     End Sub
     Private Sub btnRename_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnRename.Click
         'Rename associated files
-        FileName = VB.Right(FileDrop, VB.Len(FileDrop) - InStrRev(FileDrop, "\"))
+        FileName = Path.GetFileName(FileDrop)
         If InStr(FileName, ".") <> 0 Then FileName = VB.Left(FileName, InStr(FileName, ".") - 1)
-        FileNameTxtbox = VB.Right(txtNewName.Text, VB.Len(txtNewName.Text) - InStrRev(txtNewName.Text, "\"))
+        FileNameTxtbox = Path.GetFileName(txtNewName.Text)
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
-            foundFile = VB.Right(foundFile, VB.Len(foundFile) - InStrRev(foundFile, "\"))
+            foundFile = Path.GetFileName(foundFile)
             If InStr(foundFile, ".") = 0 Then
-                If LCase(foundFile) = LCase(FileName) Then
+                If LCase(foundFile) = LCase(FileName) Then 'it might be a windows filesystem (see note 1 at top)
                     'Renames file that doesn't have an extension e.g. "Land" in a Land.*-series
                     Rename(FilePath & foundFile, FilePath & FileNameTxtbox & "#tmp") 'Do we really need the #tmp?  What situations does it save us in?
                 End If
             Else
                 FilesInDir = VB.Left(foundFile, InStr(foundFile, ".") - 1)
                 If FileNameTxtbox <> FileName Then
-                    If LCase(FilesInDir) = LCase(FileName) Then
+                    If LCase(FilesInDir) = LCase(FileName) Then 'it might be a windows filesystem (see note 1 at top)
                         foundFileExtension = VB.Right(foundFile, VB.Len(foundFile) - InStrRev(foundFile, ".") + 1)
                         On Error GoTo 100   'If file is in use by another program
                         If InStr(foundFile, ".") = InStrRev(foundFile, ".") Then
@@ -174,13 +192,13 @@ Public Class Form1
     'We really should share code with btnRename_Click() instead of just copying the code ;)
     Private Sub btnCopy_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnCopy.Click
         'Copy associated files
-        FileName = VB.Right(FileDrop, VB.Len(FileDrop) - InStrRev(FileDrop, "\"))
+        FileName = Path.GetFileName(FileDrop)
         If InStr(FileName, ".") <> 0 Then FileName = VB.Left(FileName, InStr(FileName, ".") - 1)
-        FileNameTxtbox = VB.Right(txtNewName.Text, VB.Len(txtNewName.Text) - InStrRev(txtNewName.Text, "\"))
+        FileNameTxtbox = Path.GetFileName(txtNewName.Text)
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
-            foundFile = VB.Right(foundFile, VB.Len(foundFile) - InStrRev(foundFile, "\"))
+            foundFile = Path.GetFileName(foundFile)
             If InStr(foundFile, ".") = 0 Then
-                If LCase(foundFile) = LCase(FileName) Then
+                If LCase(foundFile) = LCase(FileName) Then 'it might be a windows filesystem (see note 1 at top)
                     'Copies file that doesn't have an extension e.g. "Land" in a Land.*-series
                     My.Computer.FileSystem.CopyFile(FilePath & foundFile, FilePath & FileNameTxtbox)
                 End If
@@ -188,7 +206,7 @@ Public Class Form1
                 FilesInDir = VB.Left(foundFile, InStr(foundFile, ".") - 1)
                 If InStr(foundFile, ".") <> 0 Then FilesInDir = VB.Left(foundFile, InStr(foundFile, ".") - 1)
                 If FileNameTxtbox <> FileName Then
-                    If LCase(FilesInDir) = LCase(FileName) Then
+                    If LCase(FilesInDir) = LCase(FileName) Then 'it might be a windows filesystem (see note 1 at top)
                         foundFileExtension = VB.Right(foundFile, VB.Len(foundFile) - InStrRev(foundFile, ".") + 1)
                         On Error GoTo 100   'Shouldn't get an error copying, should we?
                         If InStr(foundFile, ".") = InStrRev(foundFile, ".") Then
@@ -250,7 +268,7 @@ Public Class Form1
     End Sub
     Private Sub Form1_Disposed(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Disposed
         'Saves the current program position for the next LazyRenamer session
-        FileOpen(1, CurDir() & "\LazyRenamer.ini", OpenMode.Output)
+        FileOpen(1, IniFile, OpenMode.Output)
         PrintLine(1, "[StartupPosition]")
         PrintLine(1, "startposX = " & Me.Left)
         PrintLine(1, "startposY = " & Me.Top)
