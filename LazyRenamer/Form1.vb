@@ -55,14 +55,17 @@ Public Class Form1
             Me.Top = startposY
 10:         FileClose(1)
         End If
+        If Environment.GetCommandLineArgs().Length > 1 Then
+            'Get label text from file passed as a command line argument
+            'Dim fila As String = Environment.GetCommandLineArgs(1)
+            lblLoad_File(My.Application.CommandLineArgs())
+        End If
     End Sub
     Private Sub lblFile_DragEnter(ByVal sender As Object, ByVal e As System.Windows.Forms.DragEventArgs) Handles lblFile.DragEnter
         e.Effect = DragDropEffects.Link
     End Sub
-    Private Sub lblFile_DragDrop(ByVal sender As Object, ByVal e As System.Windows.Forms.DragEventArgs) Handles lblFile.DragDrop
+    Private Sub lblLoad_File(ByVal fila As Object)
         lblFile.BackColor = Color.WhiteSmoke
-        'Assign string to file drop label
-        Dim fila As String() = CType(e.Data.GetData(DataFormats.FileDrop), String())
         FileDrop = fila(0)
         lblFile.Text = FileDrop
         txtNewName.Enabled = True
@@ -83,6 +86,11 @@ Public Class Form1
         txtNewName.Focus()
         btnRename.Enabled = False
         btnCopy.Enabled = False
+    End Sub
+    Private Sub lblFile_DragDrop(ByVal sender As Object, ByVal e As System.Windows.Forms.DragEventArgs) Handles lblFile.DragDrop
+        'Get label text from file drag-and-dropped onto window
+        Dim fila As String() = CType(e.Data.GetData(DataFormats.FileDrop), String())
+        lblLoad_File(fila)
     End Sub
     Private Sub txtNewName_KeyPress(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyPressEventArgs) Handles txtNewName.KeyPress
         'Prevents user from entering illegal file name characters in textbox
