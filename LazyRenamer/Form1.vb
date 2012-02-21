@@ -103,7 +103,10 @@ Public Class Form1
     Private Sub txtNewName_KeyUp(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles txtNewName.KeyUp
         btnRename.Enabled = True
         btnCopy.Enabled = True
-        If Trim(txtNewName.Text) = "" Then btnRename.Enabled = False
+        If Trim(txtNewName.Text) = "" Then
+            btnRename.Enabled = False
+            btnCopy.Enabled = False
+        End If
         'Disables the Rename and Copy buttons if any file with that base name and any extension already exists
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
             If check_NewName(foundFile) = False Then Exit For 'the If might improve performance in really slow directories with a lot of files
