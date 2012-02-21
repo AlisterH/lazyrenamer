@@ -35,7 +35,8 @@ Public Class Form1
     Dim foundFileExtension As String, foundFileReadOnly As System.IO.FileInfo
     Dim line As String, startposX As Integer, startposY As Integer
     
-    'Hack: we don't need to use Path.DirectorySeparatorChar because even though Windows has \ as directory separator, it also accepts /
+    'Hack: we don't need to use Path.DirectorySeparatorChar for cross-platform support because even though Windows has \ as directory 
+    'separator, it also accepts /
     Dim IniFile As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "/LazyRenamer.ini"
     
     Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
@@ -57,7 +58,6 @@ Public Class Form1
         End If
         If Environment.GetCommandLineArgs().Length > 1 Then
             'Get label text from file passed as a command line argument
-            'Dim fila As String = Environment.GetCommandLineArgs(1)
             lblLoad_File(My.Application.CommandLineArgs())
         End If
     End Sub
@@ -97,6 +97,7 @@ Public Class Form1
         'N.B. Depending on the filesystem these may not all be illegal, but we can't check against Path.GetInvalidPathChars(), as this does 
         'not actually check what characters are illegal on the particular filesystem we are writing to.
         'so we restrict characters to the lowest-common-denominator: Windows
+        'Characters below are (in order): , . " * / \ : < > ?
         If e.KeyChar = ChrW(44) Or e.KeyChar = ChrW(46) Or e.KeyChar = ChrW(34) Or e.KeyChar = ChrW(42) Or e.KeyChar = ChrW(47) Or e.KeyChar = ChrW(92) Or e.KeyChar = ChrW(58) Or e.KeyChar = ChrW(60) Or e.KeyChar = ChrW(62) Or e.KeyChar = ChrW(63) Then e.Handled = True
     End Sub
     Private Sub txtNewName_KeyUp(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles txtNewName.KeyUp
