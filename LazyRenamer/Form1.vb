@@ -97,8 +97,8 @@ Public Class Form1
         'N.B. Depending on the filesystem these may not all be illegal, but we can't check against Path.GetInvalidPathChars(), as this does 
         'not actually check what characters are illegal on the particular filesystem we are writing to.
         'so we restrict characters to the lowest-common-denominator: Windows
-        'Characters below are (in order): " * / \ : < > ?
-        If e.KeyChar = ChrW(34) Or e.KeyChar = ChrW(42) Or e.KeyChar = ChrW(47) Or e.KeyChar = ChrW(92) Or e.KeyChar = ChrW(58) Or e.KeyChar = ChrW(60) Or e.KeyChar = ChrW(62) Or e.KeyChar = ChrW(63) Then e.Handled = True
+        'Characters below are (in order): " * / \ : < > ? |
+        If e.KeyChar = ChrW(34) Or e.KeyChar = ChrW(42) Or e.KeyChar = ChrW(47) Or e.KeyChar = ChrW(92) Or e.KeyChar = ChrW(58) Or e.KeyChar = ChrW(60) Or e.KeyChar = ChrW(62) Or e.KeyChar = ChrW(63) Or e.KeyChar = ChrW(124) Then e.Handled = True
     End Sub
     Private Sub txtNewName_KeyUp(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles txtNewName.KeyUp
         btnRename.Enabled = True
