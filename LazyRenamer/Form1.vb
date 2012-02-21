@@ -104,24 +104,24 @@ Public Class Form1
         btnRename.Enabled = True
         btnCopy.Enabled = True
         If Trim(txtNewName.Text) = "" Then btnRename.Enabled = False
-        'Disables the Rename and Copy buttons if any file with that name and any extension already exists
+        'Disables the Rename and Copy buttons if any file with that base name and any extension already exists
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
-            FilesInDir = Path.GetFileName(foundFile)
-            If InStr(FilesInDir, ".") <> 0 Then FilesInDir = VB.Left(FilesInDir, InStr(FilesInDir, ".") - 1)
-            If LCase(txtNewName.Text) = LCase(FilesInDir) Then 'case insensitive as it might be a windows filesystem (see note 1 at top)
-                btnRename.Enabled = False
-                btnCopy.Enabled = False
-            End If
+            If check_NewName(foundFile) = False Then Exit For 'the If might improve performance in really slow directories with a lot of files
         Next
         For Each foundFile As String In My.Computer.FileSystem.GetDirectories(FilePath)
-            FilesInDir = Path.GetFileName(foundFile)
-            If InStr(FilesInDir, ".") <> 0 Then FilesInDir = VB.Left(FilesInDir, InStr(FilesInDir, ".") - 1)
-            If LCase(txtNewName.Text) = LCase(FilesInDir) Then 'case insensitive as it might be a windows filesystem (see note 1 at top)
-                btnRename.Enabled = False
-                btnCopy.Enabled = False
-            End If
+            If check_NewName(foundFile) = False Then Exit For 'the If might improve performance in really slow directories with a lot of subfolders
         Next
     End Sub
+    Private Function check_NewName(ByVal foundFile As String) As Boolean
+        FilesInDir = Path.GetFileName(foundFile)
+        If InStr(FilesInDir, ".") <> 0 Then FilesInDir = VB.Left(FilesInDir, InStr(FilesInDir, ".") - 1)
+        If LCase(txtNewName.Text) = LCase(FilesInDir) Then 'case insensitive as it might be a windows filesystem (see note 1 at top)
+            btnRename.Enabled = False
+            btnCopy.Enabled = False
+            'Return False seems to be implied
+        End If
+        Return True
+    End Function
     Private Sub btnRename_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnRename.Click
         'Rename associated files
         FileName = Path.GetFileName(FileDrop)
