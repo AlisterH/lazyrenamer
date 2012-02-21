@@ -38,7 +38,12 @@ Public Class Form1
     'Hack: we don't need to use Path.DirectorySeparatorChar for cross-platform support because even though Windows has \ as directory 
     'separator, it also accepts /
     Dim IniFile As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "/LazyRenamer.ini"
-    
+
+    Private Sub Buttons_Disable()
+        btnRename.Enabled = False
+        btnCopy.Enabled = False
+    End Sub
+
     Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         'Restores the program position of the last LazyRenamer session
         'Looks like this doesn't work with some window managers
@@ -84,8 +89,7 @@ Public Class Form1
         lblFile.Text = FileDrop
         txtNewName.Text = FileName
         txtNewName.Focus()
-        btnRename.Enabled = False
-        btnCopy.Enabled = False
+        Buttons_Disable()
     End Sub
     Private Sub lblFile_DragDrop(ByVal sender As Object, ByVal e As System.Windows.Forms.DragEventArgs) Handles lblFile.DragDrop
         'Get label text from file drag-and-dropped onto window
@@ -103,10 +107,7 @@ Public Class Form1
     Private Sub txtNewName_KeyUp(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles txtNewName.KeyUp
         btnRename.Enabled = True
         btnCopy.Enabled = True
-        If Trim(txtNewName.Text) = "" Then
-            btnRename.Enabled = False
-            btnCopy.Enabled = False
-        End If
+        If Trim(txtNewName.Text) = "" Then Buttons_Disable()
         'Disables the Rename and Copy buttons if any file with that base name and any extension already exists
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
             If check_NewName(foundFile) = False Then Exit For 'the If might improve performance in really slow directories with a lot of files
@@ -118,11 +119,7 @@ Public Class Form1
     Private Function check_NewName(ByVal foundFile As String) As Boolean
         FilesInDir = Path.GetFileName(foundFile)
         If InStr(FilesInDir, ".") <> 0 Then FilesInDir = VB.Left(FilesInDir, InStr(FilesInDir, ".") - 1)
-        If LCase(txtNewName.Text) = LCase(FilesInDir) Then 'case insensitive as it might be a windows filesystem (see note 1 at top)
-            btnRename.Enabled = False
-            btnCopy.Enabled = False
-            'Return False seems to be implied
-        End If
+        If LCase(txtNewName.Text) = LCase(FilesInDir) Then Buttons_Disable() 'case insensitive as it might be a windows filesystem (see note 1 at top) 'Return False seems to be implied
         Return True
     End Function
     Private Sub btnRename_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnRename.Click
@@ -157,8 +154,7 @@ Public Class Form1
         lblFile.BackColor = Color.WhiteSmoke
         'Assigns the new name to the FileDrop variable
         FileDrop = FilePath & txtNewName.Text & FileExtension
-        btnRename.Enabled = False
-        btnCopy.Enabled = False
+        Buttons_Disable()
         GoTo 110
 100:    'Jumps here when "On Error" occurs
         lblFile.Text = "One or more of the associated files appears to be in use by another program. Aborting."
@@ -237,8 +233,7 @@ Public Class Form1
         lblFile.BackColor = Color.WhiteSmoke
         'Assigns the new name to the FileDrop variable
         FileDrop = FilePath & txtNewName.Text & FileExtension
-        btnRename.Enabled = False
-        btnCopy.Enabled = False
+        Buttons_Disable()
         GoTo 110
 100:    'Jumps here when "On Error" occurs
         lblFile.Text = "Aborting. This seems to be a bug!"
