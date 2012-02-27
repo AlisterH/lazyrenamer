@@ -123,157 +123,82 @@ Public Class Form1
         Return True
     End Function
     Private Sub btnRename_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnRename.Click
-        'Rename associated files
+        btn_Click(False)
+    End Sub
+    Private Sub btnCopy_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnCopy.Click
+        btn_Click(True)
+    End Sub
+    Private Sub btn_Click(ByVal Copy_TrueFalse As Boolean)
+        'Renames or Copies associated files
         FileName = Path.GetFileName(FileDrop)
         If InStr(FileName, ".") <> 0 Then FileName = VB.Left(FileName, InStr(FileName, ".") - 1)
         FileNameTxtbox = Path.GetFileName(txtNewName.Text)
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
             foundFile = Path.GetFileName(foundFile)
             If InStr(foundFile, ".") = 0 Then
-                If foundFile = FileName Then 'need to be case sensitive here as it might not be a windows filesystem (see note 2 at top)
-                    'Renames file that doesn't have an extension e.g. "Land" in a Land.*-series
-                    Rename(FilePath & foundFile, FilePath & FileNameTxtbox & "#tmp") 'Do we really need the #tmp?  What situations does it save us in?
-                End If
+                FilesInDir = foundFile
+                foundFileExtension = ""
             Else
                 FilesInDir = VB.Left(foundFile, InStr(foundFile, ".") - 1)
-                If FileNameTxtbox <> FileName Then
-                    If FilesInDir = FileName Then 'need to be case sensitive here as it might not be a windows filesystem (see note 2 at top)
-                        foundFileExtension = VB.Right(foundFile, VB.Len(foundFile) - InStrRev(foundFile, ".") + 1)
-                        On Error GoTo 100   'If file is in use by another program
-                        If InStr(foundFile, ".") = InStrRev(foundFile, ".") Then
-                            'Renames files with a single dot, e.g. "Land.shp" in a Land.*-series
-                            Rename(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp") 'Do we really need the #tmp?  What situations does it save us in?
-                        Else
-                            'Renames files with more-than-one dot, e.g. "Land.shp.xml" in a Land.*-series
-                            Rename(FilePath & foundFile, FilePath & FileNameTxtbox & VB.Mid(foundFile, InStr(foundFile, "."), (InStrRev(foundFile, ".") - InStr(foundFile, "."))) & foundFileExtension & "#tmp") 'Do we really need the #tmp?  What situations does it save us in?
-                        End If
+                foundFileExtension = VB.Right(foundFile, VB.Len(foundFile) - InStr(foundFile, ".") + 1)
+            End If
+            If FileNameTxtbox <> FileName Then 'is this test really needed?
+                If FilesInDir = FileName Then 'need to be case sensitive here as it might not be a windows filesystem (see note 2 at top)
+                    On Error GoTo 100   'If file is in use by another program
+                    If Copy_TrueFalse = False Then
+                        Rename(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp") 'Is the #tmp really wise?
+                    Else
+                        My.Computer.FileSystem.CopyFile(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp") 'Is the #tmp really wise?  Is it needed for copying as well as renaming?
                     End If
                 End If
             End If
         Next
         lblFile.BackColor = Color.WhiteSmoke
-        'Assigns the new name to the FileDrop variable
+        'Assigns the new name to the FileDrop variable.  Is this desirable for copying as well as renaming?
         FileDrop = FilePath & txtNewName.Text & FileExtension
         Buttons_Disable()
-        GoTo 110
-100:    'Jumps here when "On Error" occurs
-        lblFile.Text = "One or more of the associated files appears to be in use by another program. Aborting."
-        lblFile.BackColor = Color.LavenderBlush
-110:    'Assigns the new names (removes #tmp suffix) or restores names when error occurs
+        'Updates the Layer Name value in MapWindow layer properties files
+        MwsrFileIn = FilePath & txtNewName.Text & ".mwsr"
+        If File.Exists(MwsrFileIn) Then
+            foundFileReadOnly = My.Computer.FileSystem.GetFileInfo(MwsrFileIn)
+            If foundFileReadOnly.IsReadOnly = False Then
+                MwsrFileOut = FilePath & FileNameTxtbox & ".mwsr2"
+                FileOpen(1, MwsrFileIn, OpenMode.Input)
+                FileOpen(2, MwsrFileOut, OpenMode.Output)
+                MwsrLabelName = "Layer Name=" & ChrW(34) & FileName & ChrW(34)
+                MwsrLabelNameNew = "Layer Name=" & ChrW(34) & txtNewName.Text & ChrW(34)
+                Do
+                    MwsrLine = LineInput(1)
+                    If InStr(MwsrLine, MwsrLabelName) <> 0 Then MwsrLine = Replace(MwsrLine, MwsrLabelName, MwsrLabelNameNew)
+                    PrintLine(2, MwsrLine)
+                Loop Until VB.EOF(1) = True
+                FileClose(1, 2)
+                File.Delete(MwsrFileIn)
+                Rename(MwsrFileOut, VB.Left(MwsrFileOut, VB.Len(MwsrFileOut) - 1))
+            End If
+            If File.Exists(MwsrFileOut) = True Then File.Delete(MwsrFileIn) ' Delete old file as we seem to have been successful
+        End If
+        ' Removes #tmp as we seem to have been successful
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
             If VB.Right(foundFile, 4) = "#tmp" Then Rename(foundFile, VB.Left(foundFile, VB.Len(foundFile) - 4))
         Next
-        'Updates the Layer Name value in MapWindow layer properties files
-        MwsrFileIn = FilePath & txtNewName.Text & ".mwsr"
-        If File.Exists(MwsrFileIn) Then
-            foundFileReadOnly = My.Computer.FileSystem.GetFileInfo(MwsrFileIn)
-            If foundFileReadOnly.IsReadOnly = False Then
-                MwsrFileOut = FilePath & FileNameTxtbox & ".mwsr2"
-                FileOpen(1, MwsrFileIn, OpenMode.Input)
-                FileOpen(2, MwsrFileOut, OpenMode.Output)
-                MwsrLabelName = "Layer Name=" & ChrW(34) & FileName & ChrW(34)
-                MwsrLabelNameNew = "Layer Name=" & ChrW(34) & txtNewName.Text & ChrW(34)
-                Do
-                    MwsrLine = LineInput(1)
-                    If InStr(MwsrLine, MwsrLabelName) <> 0 Then MwsrLine = Replace(MwsrLine, MwsrLabelName, MwsrLabelNameNew)
-                    PrintLine(2, MwsrLine)
-                Loop Until VB.EOF(1) = True
-                FileClose(1, 2)
-                File.Delete(MwsrFileIn)
-                Rename(MwsrFileOut, VB.Left(MwsrFileOut, VB.Len(MwsrFileOut) - 1))
-            End If
-        End If
+        'Updates Gui
         FileName = lblFile.Text
-        If File.Exists(MwsrFileOut) = True Then File.Delete(MwsrFileIn)
-        If lblFile.BackColor <> Color.LavenderBlush Then txtNewName.Focus()
-        'Updates the file label with the new file name
-        If lblFile.Text <> "One or more of the associated files appears to be in use by another program. Aborting." Then
-            lblFile.BackColor = Color.WhiteSmoke
-            'Updates lblfile.text with the new name ...
-            If InStr(FileName, ".") = 0 Then
-                lblFile.Text = FilePath & txtNewName.Text
-            ElseIf FileNameDot <> FileName Then
-                lblFile.Text = FilePath & txtNewName.Text & VB.Mid(FileNameDot, InStr(FileNameDot, "."), VB.Len(FileNameDot))
-            Else
-                lblFile.Text = FilePath & txtNewName.Text & FileExtension
-            End If
-        End If
-    End Sub
-    'We really should share code with btnRename_Click() instead of just copying the code ;)
-    Private Sub btnCopy_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnCopy.Click
-        'Copy associated files
-        FileName = Path.GetFileName(FileDrop)
-        If InStr(FileName, ".") <> 0 Then FileName = VB.Left(FileName, InStr(FileName, ".") - 1)
-        FileNameTxtbox = Path.GetFileName(txtNewName.Text)
-        For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
-            foundFile = Path.GetFileName(foundFile)
-            If InStr(foundFile, ".") = 0 Then
-                If foundFile = FileName Then 'need to be case sensitive here as it might not be a windows filesystem (see note 2 at top)
-                    'Copies file that doesn't have an extension e.g. "Land" in a Land.*-series
-                    My.Computer.FileSystem.CopyFile(FilePath & foundFile, FilePath & FileNameTxtbox)
-                End If
-            Else
-                FilesInDir = VB.Left(foundFile, InStr(foundFile, ".") - 1)
-                If InStr(foundFile, ".") <> 0 Then FilesInDir = VB.Left(foundFile, InStr(foundFile, ".") - 1)
-                If FileNameTxtbox <> FileName Then
-                    If FilesInDir = FileName Then 'need to be case sensitive here as it might not be a windows filesystem (see note 2 at top)
-                        foundFileExtension = VB.Right(foundFile, VB.Len(foundFile) - InStrRev(foundFile, ".") + 1)
-                        On Error GoTo 100   'Shouldn't get an error copying, should we?
-                        If InStr(foundFile, ".") = InStrRev(foundFile, ".") Then
-                            'Copies files with a single dot, e.g. "Land.shp" in a Land.*-series
-                            My.Computer.FileSystem.CopyFile(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension)
-                        Else
-                            'Copies files with more-than-one dot, e.g. "Land.shp.xml" in a Land.*-series
-                            My.Computer.FileSystem.CopyFile(FilePath & foundFile, FilePath & FileNameTxtbox & VB.Mid(foundFile, InStr(foundFile, "."), (InStrRev(foundFile, ".") - InStr(foundFile, "."))) & foundFileExtension)
-                        End If
-                    End If
-                End If
-            End If
-        Next
+        txtNewName.Focus()
         lblFile.BackColor = Color.WhiteSmoke
-        'Assigns the new name to the FileDrop variable
-        FileDrop = FilePath & txtNewName.Text & FileExtension
-        Buttons_Disable()
-        GoTo 110
+        If InStr(FileName, ".") = 0 Then
+            lblFile.Text = FilePath & txtNewName.Text
+        ElseIf FileNameDot <> FileName Then
+            lblFile.Text = FilePath & txtNewName.Text & VB.Mid(FileNameDot, InStr(FileNameDot, "."), VB.Len(FileNameDot))
+        Else
+            lblFile.Text = FilePath & txtNewName.Text & FileExtension
+        End If
+        Exit Sub
 100:    'Jumps here when "On Error" occurs
-        lblFile.Text = "Aborting. This seems to be a bug!"
+        lblFile.Text = "One or more of the associated files appears to be in use by another program. Close the file and try again."
         lblFile.BackColor = Color.LavenderBlush
-110:    'Hmmm.  What happens if an error occurs while copying?  Is it possible?
-        'Updates the Layer Name value in MapWindow layer properties files
-        MwsrFileIn = FilePath & txtNewName.Text & ".mwsr"
-        If File.Exists(MwsrFileIn) Then
-            foundFileReadOnly = My.Computer.FileSystem.GetFileInfo(MwsrFileIn)
-            If foundFileReadOnly.IsReadOnly = False Then
-                MwsrFileOut = FilePath & FileNameTxtbox & ".mwsr2"
-                FileOpen(1, MwsrFileIn, OpenMode.Input)
-                FileOpen(2, MwsrFileOut, OpenMode.Output)
-                MwsrLabelName = "Layer Name=" & ChrW(34) & FileName & ChrW(34)
-                MwsrLabelNameNew = "Layer Name=" & ChrW(34) & txtNewName.Text & ChrW(34)
-                Do
-                    MwsrLine = LineInput(1)
-                    If InStr(MwsrLine, MwsrLabelName) <> 0 Then MwsrLine = Replace(MwsrLine, MwsrLabelName, MwsrLabelNameNew)
-                    PrintLine(2, MwsrLine)
-                Loop Until VB.EOF(1) = True
-                FileClose(1, 2)
-                File.Delete(MwsrFileIn)
-                Rename(MwsrFileOut, VB.Left(MwsrFileOut, VB.Len(MwsrFileOut) - 1))
-            End If
-        End If
-        FileName = lblFile.Text
-        If File.Exists(MwsrFileOut) = True Then File.Delete(MwsrFileIn)
-        If lblFile.BackColor <> Color.LavenderBlush Then txtNewName.Focus()
-        'Updates the file label with the new file name
-        If lblFile.Text <> "One or more of the associated files appears to be in use by another program. Aborting." Then
-            lblFile.BackColor = Color.WhiteSmoke
-            'Updates lblfile.text with the new name ...
-            If InStr(FileName, ".") = 0 Then
-                lblFile.Text = FilePath & txtNewName.Text
-            ElseIf FileNameDot <> FileName Then
-                lblFile.Text = FilePath & txtNewName.Text & VB.Mid(FileNameDot, InStr(FileNameDot, "."), VB.Len(FileNameDot))
-            Else
-                lblFile.Text = FilePath & txtNewName.Text & FileExtension
-            End If
-        End If
+        'Should we restore any files with a #tmp to their original filenames if there has been an error?
+        'At the moment the user can close any files in use and click rename again to finish the failed attempt.  This is better in a way.
     End Sub
     Private Sub Form1_Disposed(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Disposed
         'Saves the current program position for the next LazyRenamer session
