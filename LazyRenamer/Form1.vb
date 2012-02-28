@@ -34,7 +34,6 @@ Public Class Form1
     Dim TestIfExist As String, BatchFile As String, FilesInDir As String, FileNameTxtbox As String
     Dim foundFileExtension As String, foundFileReadOnly As System.IO.FileInfo
     Dim line As String, startposX As Integer, startposY As Integer
-    
     'Hack: we don't need to use Path.DirectorySeparatorChar for cross-platform support because even though Windows has \ as directory 
     'separator, it also accepts /
     Dim IniFile As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "/LazyRenamer.ini"
@@ -43,7 +42,6 @@ Public Class Form1
         btnRename.Enabled = False
         btnCopy.Enabled = False
     End Sub
-
     Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         'Restores the program position of the last LazyRenamer session
         'Looks like this doesn't work with some window managers
@@ -82,7 +80,7 @@ Public Class Form1
             FileName = VB.Left(FileName, InStr(FileName, ".") - 1) 'Do we really need this variable, or could we work directly with txtNewName.Text?
             FileExtension = VB.Right(FileDrop, VB.Len(FileDrop) - InStrRev(FileDrop, ".") + 1)
         End If
-        'Update gui
+        'Updates gui
         lblFile.BackColor = Color.WhiteSmoke
         lblFile.Text = FileDrop
         txtNewName.Enabled = True
@@ -99,6 +97,7 @@ Public Class Form1
     End Sub
     Private Sub txtNewName_KeyPress(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyPressEventArgs) Handles txtNewName.KeyPress
         'Prevents user from entering illegal file name characters in textbox
+        'Does not process pasted text!
         'N.B. Depending on the filesystem these may not all be illegal, but we can't check against Path.GetInvalidPathChars(), as this does 
         'not actually check what characters are illegal on the particular filesystem we are writing to.
         'so we restrict characters to the lowest-common-denominator: Windows
@@ -107,12 +106,15 @@ Public Class Form1
     End Sub
     Private Sub txtNewName_KeyUp(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles txtNewName.KeyUp
         Buttons_Disable()
-        If Trim(VB.Right(txtNewName.Text, 1)) = "" Then Exit Sub 'need to be able to rename a file with no extension reliably
-        'check_NewName (below) returns False if a file/folder with a base name equal to txtNewName.Text (and any extension) already exists
+        'disallow blank filenames or trailing spaces so we can rename a file with no extension reliably
+        'does not detect if the user "cuts" the whole file name!
+        If Trim(VB.Right(txtNewName.Text, 1)) = "" Then Exit Sub
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
+            'returns False if a file/folder with a base name equal to txtNewName.Text (and any extension) already exists
             If check_NewName(foundFile) = False Then Exit Sub
         Next
         For Each foundFile As String In My.Computer.FileSystem.GetDirectories(FilePath)
+            'returns False if a file/folder with a base name equal to txtNewName.Text (and any extension) already exists
             If check_NewName(foundFile) = False Then Exit Sub
         Next
         btnRename.Enabled = True
@@ -131,7 +133,7 @@ Public Class Form1
         btn_Click(True)
     End Sub
     Private Sub btn_Click(ByVal Copy_TrueFalse As Boolean)
-        'Renames or Copies associated files
+        'Renames or Copies all associated files
         FileNameTxtbox = Path.GetFileName(txtNewName.Text) ' Why do we need this variable?
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
             foundFile = Path.GetFileName(foundFile)
@@ -142,7 +144,7 @@ Public Class Form1
                 FilesInDir = VB.Left(foundFile, InStr(foundFile, ".") - 1)
                 foundFileExtension = VB.Right(foundFile, VB.Len(foundFile) - InStr(foundFile, ".") + 1)
             End If
-            If FileNameTxtbox <> FileName Then 'is this test really needed?
+            If FileNameTxtbox <> FileName Then 'Q - is this test really needed? A - it won't be once we process _pasted_ text (instead of only typed text).
                 If FilesInDir = FileName Then 'need to be case sensitive here as it might not be a windows filesystem (see note 2 at top)
                     On Error GoTo 100   'If file is in use by another program
                     If Copy_TrueFalse = False Then
@@ -172,9 +174,10 @@ Public Class Form1
                 File.Delete(MwsrFileIn)
                 Rename(MwsrFileOut, VB.Left(MwsrFileOut, VB.Len(MwsrFileOut) - 1))
             End If
-            If File.Exists(MwsrFileOut) = True Then File.Delete(MwsrFileIn) ' Delete old file as we seem to have been successful
+            'Deletes old file as we seem to have been successful
+            If File.Exists(MwsrFileOut) = True Then File.Delete(MwsrFileIn)
         End If
-        ' Removes #tmp as we seem to have been successful
+        'Removes #tmp as we seem to have been successful
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
             If VB.Right(foundFile, 4) = "#tmp" Then Rename(foundFile, VB.Left(foundFile, VB.Len(foundFile) - 4))
         Next
