@@ -95,6 +95,7 @@ Public Class Form1
         'Get label text from file drag-and-dropped onto window
         Dim fila As String() = CType(e.Data.GetData(DataFormats.FileDrop), String())
         lblLoad_File(fila)
+        Me.Activate()
     End Sub
     Private Sub txtNewName_KeyPress(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyPressEventArgs) Handles txtNewName.KeyPress
         'Prevents user from entering illegal file name characters in textbox
