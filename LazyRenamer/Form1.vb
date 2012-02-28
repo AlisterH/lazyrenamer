@@ -105,8 +105,8 @@ Public Class Form1
     End Sub
     Private Sub txtNewName_KeyUp(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles txtNewName.KeyUp
         Buttons_Disable()
-        If Trim(txtNewName.Text) = "" Then Exit Sub
-        'check_NewName returns False if a file/folder with a base name equal to txtNewName.Text (and any extension) already exists
+        If Trim(VB.Right(txtNewName.Text, 1)) = "" Then Exit Sub 'need to be able to renamed a file with no extension reliably
+        'check_NewName (below) returns False if a file/folder with a base name equal to txtNewName.Text (and any extension) already exists
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
             If check_NewName(foundFile) = False Then Exit Sub
         Next
