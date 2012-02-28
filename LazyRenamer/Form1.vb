@@ -132,9 +132,7 @@ Public Class Form1
     End Sub
     Private Sub btn_Click(ByVal Copy_TrueFalse As Boolean)
         'Renames or Copies associated files
-        FileName = Path.GetFileName(FileDrop) 'Do we really need this variable, or could we work directly with lblFile.Text?
-        If InStr(FileName, ".") <> 0 Then FileName = VB.Left(FileName, InStr(FileName, ".") - 1) 'Do we really need this variable, or could we work directly with lblFile.Text?
-        FileNameTxtbox = Path.GetFileName(txtNewName.Text)
+        FileNameTxtbox = Path.GetFileName(txtNewName.Text) ' Why do we need this variable?
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
             foundFile = Path.GetFileName(foundFile)
             If InStr(foundFile, ".") = 0 Then
@@ -180,11 +178,10 @@ Public Class Form1
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
             If VB.Right(foundFile, 4) = "#tmp" Then Rename(foundFile, VB.Left(foundFile, VB.Len(foundFile) - 4))
         Next
-        'Assigns the new name to the FileDrop variable.  Is this desirable for copying as well as renaming?
-        FileDrop = FilePath & txtNewName.Text & FileExtension
-        FileName = lblFile.Text 'Do we really need this variable, or could we work directly with lblFile.Text?
+        'Updates the FileName variable
+        FileName = txtNewName.Text
         'Updates Gui
-        lblFile.Text = FileDrop
+        lblFile.Text = FilePath & txtNewName.Text & FileExtension
         lblFile.BackColor = Color.WhiteSmoke
         Buttons_Disable()
         txtNewName.Focus()
