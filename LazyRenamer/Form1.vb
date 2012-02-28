@@ -109,10 +109,10 @@ Public Class Form1
         If Trim(txtNewName.Text) = "" Then Buttons_Disable()
         'Disables the Rename and Copy buttons if any file with that base name and any extension already exists
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
-            If check_NewName(foundFile) = False Then Exit For 'the If might improve performance in really slow directories with a lot of files
+            If check_NewName(foundFile) = False Then Exit Sub 'the If might improve performance in really slow directories with a lot of files
         Next
         For Each foundFile As String In My.Computer.FileSystem.GetDirectories(FilePath)
-            If check_NewName(foundFile) = False Then Exit For 'the If might improve performance in really slow directories with a lot of subfolders
+            If check_NewName(foundFile) = False Then Exit Sub 'the If might improve performance in really slow directories with a lot of subfolders
         Next
     End Sub
     Private Function check_NewName(ByVal foundFile As String) As Boolean
