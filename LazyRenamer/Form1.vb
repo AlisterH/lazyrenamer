@@ -87,7 +87,8 @@ Public Class Form1
         lblFile.Text = FileDrop
         txtNewName.Enabled = True
         txtNewName.Text = FileName
-        txtNewName.Focus()
+        lblFile.Focus() 'hack: if a file is dropped onto lazyrename twice we need to unfocus txtNewName before focusing it, so that the filename is selected
+        txtNewName.Focus() 'maybe we should also select the filename after renaming or copying
         Buttons_Disable()
     End Sub
     Private Sub lblFile_DragDrop(ByVal sender As Object, ByVal e As System.Windows.Forms.DragEventArgs) Handles lblFile.DragDrop
