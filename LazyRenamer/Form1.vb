@@ -70,24 +70,24 @@ Public Class Form1
         e.Effect = DragDropEffects.Link
     End Sub
     Private Sub lblLoad_File(ByVal fila As Object)
-        lblFile.BackColor = Color.WhiteSmoke
         FileDrop = fila(0)
-        lblFile.Text = FileDrop
-        txtNewName.Enabled = True
         'Determines the path, name and extension of the dropped file
         'Shouldn't something like this work, too?
         'FilePath = Path.Combine(Path.GetDirectoryName(FileDrop),Path.DirectorySeparatorChar)
         FilePath = VB.Left(FileDrop, InStrRev(FileDrop, Path.DirectorySeparatorChar))
-        FileName = Path.GetFileName(FileDrop)
+        FileName = Path.GetFileName(FileDrop) 'Do we really need this variable, or could we work directly with lblFile.Text?
         'Note we can't use Path.GetExtension() because it handles files with multiple extensions incorrectly
         'Files with multiple extensions are probably more common in fields where we would use lazyrename than are random dots in the middle of a name.
         If InStr(FileName, ".") <> 0 Then
-            FileName = VB.Left(FileName, InStr(FileName, ".") - 1)
+            FileName = VB.Left(FileName, InStr(FileName, ".") - 1) 'Do we really need this variable, or could we work directly with lblFile.Text?
             FileExtension = VB.Right(FileDrop, VB.Len(FileDrop) - InStrRev(FileDrop, ".") + 1)
         End If
+        'Update gui
+        lblFile.BackColor = Color.WhiteSmoke
         lblFile.Text = FileDrop
         txtNewName.Text = FileName
         txtNewName.Focus()
+        txtNewName.Enabled = True
         Buttons_Disable()
     End Sub
     Private Sub lblFile_DragDrop(ByVal sender As Object, ByVal e As System.Windows.Forms.DragEventArgs) Handles lblFile.DragDrop
@@ -129,8 +129,8 @@ Public Class Form1
     End Sub
     Private Sub btn_Click(ByVal Copy_TrueFalse As Boolean)
         'Renames or Copies associated files
-        FileName = Path.GetFileName(FileDrop)
-        If InStr(FileName, ".") <> 0 Then FileName = VB.Left(FileName, InStr(FileName, ".") - 1)
+        FileName = Path.GetFileName(FileDrop) 'Do we really need this variable, or could we work directly with lblFile.Text?
+        If InStr(FileName, ".") <> 0 Then FileName = VB.Left(FileName, InStr(FileName, ".") - 1) 'Do we really need this variable, or could we work directly with lblFile.Text?
         FileNameTxtbox = Path.GetFileName(txtNewName.Text)
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
             foundFile = Path.GetFileName(foundFile)
@@ -179,7 +179,7 @@ Public Class Form1
         Next
         'Assigns the new name to the FileDrop variable.  Is this desirable for copying as well as renaming?
         FileDrop = FilePath & txtNewName.Text & FileExtension
-        FileName = lblFile.Text
+        FileName = lblFile.Text 'Do we really need this variable, or could we work directly with lblFile.Text?
         'Updates Gui
         lblFile.Text = FileDrop
         lblFile.BackColor = Color.WhiteSmoke
