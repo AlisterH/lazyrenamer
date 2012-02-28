@@ -85,9 +85,9 @@ Public Class Form1
         'Update gui
         lblFile.BackColor = Color.WhiteSmoke
         lblFile.Text = FileDrop
+        txtNewName.Enabled = True
         txtNewName.Text = FileName
         txtNewName.Focus()
-        txtNewName.Enabled = True
         Buttons_Disable()
     End Sub
     Private Sub lblFile_DragDrop(ByVal sender As Object, ByVal e As System.Windows.Forms.DragEventArgs) Handles lblFile.DragDrop
