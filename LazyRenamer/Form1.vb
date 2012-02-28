@@ -75,11 +75,11 @@ Public Class Form1
         'Shouldn't something like this work, too?
         'FilePath = Path.Combine(Path.GetDirectoryName(FileDrop),Path.DirectorySeparatorChar)
         FilePath = VB.Left(FileDrop, InStrRev(FileDrop, Path.DirectorySeparatorChar))
-        FileName = Path.GetFileName(FileDrop) 'Do we really need this variable, or could we work directly with lblFile.Text?
+        FileName = Path.GetFileName(FileDrop) 'Do we really need this variable, or could we work directly with txtNewName.Text?
         'Note we can't use Path.GetExtension() because it handles files with multiple extensions incorrectly
         'Files with multiple extensions are probably more common in fields where we would use lazyrename than are random dots in the middle of a name.
         If InStr(FileName, ".") <> 0 Then
-            FileName = VB.Left(FileName, InStr(FileName, ".") - 1) 'Do we really need this variable, or could we work directly with lblFile.Text?
+            FileName = VB.Left(FileName, InStr(FileName, ".") - 1) 'Do we really need this variable, or could we work directly with txtNewName.Text?
             FileExtension = VB.Right(FileDrop, VB.Len(FileDrop) - InStrRev(FileDrop, ".") + 1)
         End If
         'Update gui
