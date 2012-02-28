@@ -31,7 +31,7 @@ Imports System.IO
 Public Class Form1
     Dim FileDrop As String, FilePath As String, FileName As String, FileExtension As String
     Dim MwsrFileIn As String, MwsrFileOut As String, MwsrLine As String, MwsrLabelName As String, MwsrLabelNameNew As String
-    Dim TestIfExist As String, FileNameDot As String, BatchFile As String, FilesInDir As String, FileNameTxtbox As String
+    Dim TestIfExist As String, BatchFile As String, FilesInDir As String, FileNameTxtbox As String
     Dim foundFileExtension As String, foundFileReadOnly As System.IO.FileInfo
     Dim line As String, startposX As Integer, startposY As Integer
     
@@ -82,7 +82,6 @@ Public Class Form1
         'Note we can't use Path.GetExtension() because it handles files with multiple extensions incorrectly
         'Files with multiple extensions are probably more common in fields where we would use lazyrename than are random dots in the middle of a name.
         If InStr(FileName, ".") <> 0 Then
-            FileNameDot = FileName
             FileName = VB.Left(FileName, InStr(FileName, ".") - 1)
             FileExtension = VB.Right(FileDrop, VB.Len(FileDrop) - InStrRev(FileDrop, ".") + 1)
         End If
@@ -153,10 +152,6 @@ Public Class Form1
                 End If
             End If
         Next
-        lblFile.BackColor = Color.WhiteSmoke
-        'Assigns the new name to the FileDrop variable.  Is this desirable for copying as well as renaming?
-        FileDrop = FilePath & txtNewName.Text & FileExtension
-        Buttons_Disable()
         'Updates the Layer Name value in MapWindow layer properties files
         MwsrFileIn = FilePath & txtNewName.Text & ".mwsr"
         If File.Exists(MwsrFileIn) Then
@@ -182,17 +177,14 @@ Public Class Form1
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
             If VB.Right(foundFile, 4) = "#tmp" Then Rename(foundFile, VB.Left(foundFile, VB.Len(foundFile) - 4))
         Next
-        'Updates Gui
+        'Assigns the new name to the FileDrop variable.  Is this desirable for copying as well as renaming?
+        FileDrop = FilePath & txtNewName.Text & FileExtension
         FileName = lblFile.Text
-        txtNewName.Focus()
+        'Updates Gui
+        lblFile.Text = FileDrop
         lblFile.BackColor = Color.WhiteSmoke
-        If InStr(FileName, ".") = 0 Then
-            lblFile.Text = FilePath & txtNewName.Text
-        ElseIf FileNameDot <> FileName Then
-            lblFile.Text = FilePath & txtNewName.Text & VB.Mid(FileNameDot, InStr(FileNameDot, "."), VB.Len(FileNameDot))
-        Else
-            lblFile.Text = FilePath & txtNewName.Text & FileExtension
-        End If
+        Buttons_Disable()
+        txtNewName.Focus()
         Exit Sub
 100:    'Jumps here when "On Error" occurs
         lblFile.Text = "One or more of the associated files appears to be in use by another program. Close the file and try again."
