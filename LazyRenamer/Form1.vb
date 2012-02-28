@@ -104,21 +104,22 @@ Public Class Form1
         If e.KeyChar = ChrW(34) Or e.KeyChar = ChrW(42) Or e.KeyChar = ChrW(47) Or e.KeyChar = ChrW(92) Or e.KeyChar = ChrW(58) Or e.KeyChar = ChrW(60) Or e.KeyChar = ChrW(62) Or e.KeyChar = ChrW(63) Or e.KeyChar = ChrW(124) Then e.Handled = True
     End Sub
     Private Sub txtNewName_KeyUp(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles txtNewName.KeyUp
-        btnRename.Enabled = True
-        btnCopy.Enabled = True
-        If Trim(txtNewName.Text) = "" Then Buttons_Disable()
-        'Disables the Rename and Copy buttons if any file with that base name and any extension already exists
+        Buttons_Disable()
+        If Trim(txtNewName.Text) = "" Then Exit Sub
+        'check_NewName returns False if a file/folder with a base name equal to txtNewName.Text (and any extension) already exists
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
-            If check_NewName(foundFile) = False Then Exit Sub 'the If might improve performance in really slow directories with a lot of files
+            If check_NewName(foundFile) = False Then Exit Sub
         Next
         For Each foundFile As String In My.Computer.FileSystem.GetDirectories(FilePath)
-            If check_NewName(foundFile) = False Then Exit Sub 'the If might improve performance in really slow directories with a lot of subfolders
+            If check_NewName(foundFile) = False Then Exit Sub
         Next
+        btnRename.Enabled = True
+        btnCopy.Enabled = True
     End Sub
     Private Function check_NewName(ByVal foundFile As String) As Boolean
         FilesInDir = Path.GetFileName(foundFile)
         If InStr(FilesInDir, ".") <> 0 Then FilesInDir = VB.Left(FilesInDir, InStr(FilesInDir, ".") - 1)
-        If LCase(txtNewName.Text) = LCase(FilesInDir) Then Buttons_Disable() 'case insensitive as it might be a windows filesystem (see note 1 at top) 'Return False seems to be implied
+        If LCase(txtNewName.Text) = LCase(FilesInDir) Then Exit Function 'Returns False
         Return True
     End Function
     Private Sub btnRename_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnRename.Click
