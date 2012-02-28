@@ -106,15 +106,15 @@ Public Class Form1
     End Sub
     Private Sub txtNewName_KeyUp(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles txtNewName.KeyUp
         Buttons_Disable()
-        'disallow blank filenames or trailing spaces so we can rename a file with no extension reliably
+        'disallow file base name that is blank or has trailing spaces, so we can rename a file with no extension reliably
         'does not detect if the user "cuts" the whole file name!
         If Trim(VB.Right(txtNewName.Text, 1)) = "" Then Exit Sub
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
-            'returns False if a file/folder with a base name equal to txtNewName.Text (and any extension) already exists
+            'disallow file base name if a file with the same base name (and any extension) already exists
             If check_NewName(foundFile) = False Then Exit Sub
         Next
         For Each foundFile As String In My.Computer.FileSystem.GetDirectories(FilePath)
-            'returns False if a file/folder with a base name equal to txtNewName.Text (and any extension) already exists
+            'disallow file base name if a folder with the same base name (and any extension) already exists
             If check_NewName(foundFile) = False Then Exit Sub
         Next
         btnRename.Enabled = True
