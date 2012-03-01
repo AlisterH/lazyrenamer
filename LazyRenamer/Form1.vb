@@ -155,6 +155,29 @@ Public Class Form1
                 End If
             End If
         Next
+        For Each foundFile As String In My.Computer.FileSystem.GetDirectories(FilePath)
+            'Why does this section not work?
+            foundFile = Path.GetFileName(foundFile)
+            'not changed
+            If InStr(foundFile, ".") = 0 Then
+                FilesInDir = foundFile
+                foundFileExtension = ""
+            Else
+                FilesInDir = VB.Left(foundFile, InStr(foundFile, ".") - 1)
+                foundFileExtension = VB.Right(foundFile, VB.Len(foundFile) - InStr(foundFile, ".") + 1)
+            End If
+            If FileNameTxtbox <> FileName Then 'Q - is this test really needed? A - it won't be once we process _pasted_ text (instead of only typed text).
+                If FilesInDir = FileName Then 'need to be case sensitive here as it might not be a windows filesystem (see note 2 at top)
+                    '/not changed
+                    On Error GoTo 100   'If file is in use by another program
+                    If Copy_TrueFalse = False Then
+                        Rename(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp") 'Is the #tmp really wise?
+                    Else
+                        My.Computer.FileSystem.CopyDirectory(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp") 'Is the #tmp really wise?  Is it needed for copying as well as renaming?
+                    End If
+                End If
+            End If
+        Next
         'Updates the Layer Name value in MapWindow layer properties files
         MwsrFileIn = FilePath & txtNewName.Text & ".mwsr"
         If File.Exists(MwsrFileIn) Then
@@ -179,6 +202,9 @@ Public Class Form1
         End If
         'Removes #tmp as we seem to have been successful
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
+            If VB.Right(foundFile, 4) = "#tmp" Then Rename(foundFile, VB.Left(foundFile, VB.Len(foundFile) - 4))
+        Next
+        For Each foundFile As String In My.Computer.FileSystem.GetDirectories(FilePath)
             If VB.Right(foundFile, 4) = "#tmp" Then Rename(foundFile, VB.Left(foundFile, VB.Len(foundFile) - 4))
         Next
         'Updates the FileName variable
