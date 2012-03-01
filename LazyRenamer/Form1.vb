@@ -133,50 +133,17 @@ Public Class Form1
         btn_Click(True)
     End Sub
     Private Sub btn_Click(ByVal Copy_TrueFalse As Boolean)
-        'Renames or Copies all associated files
         FileNameTxtbox = Path.GetFileName(txtNewName.Text) ' Why do we need this variable?
+        On Error GoTo 100   'If file we try to rename is in use by another program
+        'Renames or Copies all associated files
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
             foundFile = Path.GetFileName(foundFile)
-            If InStr(foundFile, ".") = 0 Then
-                FilesInDir = foundFile
-                foundFileExtension = ""
-            Else
-                FilesInDir = VB.Left(foundFile, InStr(foundFile, ".") - 1)
-                foundFileExtension = VB.Right(foundFile, VB.Len(foundFile) - InStr(foundFile, ".") + 1)
-            End If
-            If FileNameTxtbox <> FileName Then 'Q - is this test really needed? A - it won't be once we process _pasted_ text (instead of only typed text).
-                If FilesInDir = FileName Then 'need to be case sensitive here as it might not be a windows filesystem (see note 2 at top)
-                    On Error GoTo 100   'If file is in use by another program
-                    If Copy_TrueFalse = False Then
-                        Rename(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp") 'Is the #tmp really wise?
-                    Else
-                        My.Computer.FileSystem.CopyFile(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp") 'Is the #tmp really wise?  Is it needed for copying as well as renaming?
-                    End If
-                End If
-            End If
+            CopyOrRename(foundFile, Copy_TrueFalse, False)
         Next
+        'Renames or Copies all associated directories
         For Each foundFile As String In My.Computer.FileSystem.GetDirectories(FilePath)
-            'Why does this section not work?
             foundFile = Path.GetFileName(foundFile)
-            'not changed
-            If InStr(foundFile, ".") = 0 Then
-                FilesInDir = foundFile
-                foundFileExtension = ""
-            Else
-                FilesInDir = VB.Left(foundFile, InStr(foundFile, ".") - 1)
-                foundFileExtension = VB.Right(foundFile, VB.Len(foundFile) - InStr(foundFile, ".") + 1)
-            End If
-            If FileNameTxtbox <> FileName Then 'Q - is this test really needed? A - it won't be once we process _pasted_ text (instead of only typed text).
-                If FilesInDir = FileName Then 'need to be case sensitive here as it might not be a windows filesystem (see note 2 at top)
-                    '/not changed
-                    On Error GoTo 100   'If file is in use by another program
-                    If Copy_TrueFalse = False Then
-                        Rename(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp") 'Is the #tmp really wise?
-                    Else
-                        My.Computer.FileSystem.CopyDirectory(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp") 'Is the #tmp really wise?  Is it needed for copying as well as renaming?
-                    End If
-                End If
-            End If
+            CopyOrRename(foundFile, Copy_TrueFalse, True)
         Next
         'Updates the Layer Name value in MapWindow layer properties files
         MwsrFileIn = FilePath & txtNewName.Text & ".mwsr"
@@ -220,6 +187,28 @@ Public Class Form1
         lblFile.BackColor = Color.LavenderBlush
         'Should we restore any files with a #tmp to their original filenames if there has been an error?
         'At the moment the user can close any files in use and click rename again to finish the failed attempt.  This is better in a way.
+    End Sub
+    Private Sub CopyOrRename(ByVal foundFile As String, ByVal Copy_TrueFalse As Boolean, ByVal IsDirectory As Boolean)
+        If InStr(foundFile, ".") = 0 Then
+            FilesInDir = foundFile
+            foundFileExtension = ""
+        Else
+            FilesInDir = VB.Left(foundFile, InStr(foundFile, ".") - 1)
+            foundFileExtension = VB.Right(foundFile, VB.Len(foundFile) - InStr(foundFile, ".") + 1)
+        End If
+        If FileNameTxtbox <> FileName Then 'Q - is this test really needed? A - it won't be once we process _pasted_ text (instead of only typed text).
+            If FilesInDir = FileName Then 'need to be case sensitive here as it might not be a windows filesystem (see note 2 at top)
+                If Copy_TrueFalse = False Then
+                    Rename(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp") 'Is the #tmp really wise?
+                Else
+                    If (IsDirectory = False) Then
+                        My.Computer.FileSystem.CopyFile(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp") 'Is the #tmp really wise?  Is it needed for copying as well as renaming?
+                    Else
+                        My.Computer.FileSystem.CopyDirectory(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp") 'Is the #tmp really wise?  Is it needed for copying as well as renaming?
+                    End If
+                End If
+            End If
+        End If
     End Sub
     Private Sub Form1_Disposed(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Disposed
         'Saves the current program position for the next LazyRenamer session
