@@ -50,12 +50,21 @@ Lazyrenamer can handle files with multiple extensions - useful when you have set
    Sails.stc.01.bak
    Sails.stc.dwh
 
-LazyRenamer will also rename a matching file with no extension, but will not currently rename directories.
+LazyRenamer also renames matching directories and matching files with no extension.
 LazyRenamer also updates the Layer Name attribute in MapWindow MWSR files.
 
 Either the open source and cross platform Mono runtime OR Microsoft .NET Framework 2.0 or later is required to run this program.
 
 
+----------------
+Known Issues - version 1.2:
+
+- Does not detect name clashes due to files created after you type the new name and before you click "copy" or "rename"
+- Does not report if the file has been removed before you click "copy" or "rename"
+- Does not validate the new name when you paste into it, or use cut or undo via the mouse. 
+
+For more details, or new issues check 
+http://code.google.com/p/lazyrenamer/issues/list?q=label:Type-Defect
 ----------------
 
 New developers wanted
