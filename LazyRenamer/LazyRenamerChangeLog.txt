@@ -1,4 +1,17 @@
 ----------------
+LazyRenamer v1.2 highlights
+
+- Support for real operating systems (e.g. Linux) via Mono
+- save .ini file in the user's application data folder, instead of the working directory
+- accept a file as an input argument at startup (drag-and-drop onto LazyRenamer.exe)
+- only rename files with _case sensitively_ matching basenames, to prevent errors trying to rename two _case insensitively_ matching files to the same name
+- improvements to validation of entered filenames
+- rename matching folders as well as files
+- performance improvements for really slow environments
+- other minor improvements
+
+
+----------------
 LazyRenamer v1.1 highlights
 
 - Fix bug where error "files appears to be in use by another program" is produced if the path of the containing directory includes a .
