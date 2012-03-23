@@ -31,7 +31,7 @@ Imports System.IO
 Public Class Form1
     Dim fila As String(), FileDrop As String, FilePath As String, FileName As String, FileExtension As String
     Dim MwsrFileIn As String, MwsrFileOut As String, MwsrLine As String, MwsrLabelName As String, MwsrLabelNameNew As String
-    Dim TestIfExist As String, FilesInDir As String, FileNameTxtbox As String
+    Dim FilesInDir As String, FileNameTxtbox As String
     Dim foundFileExtension As String, foundFileReadOnly As System.IO.FileInfo
     Dim line As String, startposX As Integer, startposY As Integer
     'Hack: we don't need to use Path.DirectorySeparatorChar for cross-platform support because even though Windows has \ as directory 
