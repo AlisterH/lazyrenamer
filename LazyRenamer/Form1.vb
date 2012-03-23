@@ -29,7 +29,7 @@
 Imports VB = Microsoft.VisualBasic
 Imports System.IO
 Public Class Form1
-    Dim FileDrop As String, FilePath As String, FileName As String, FileExtension As String
+    Dim fila As String(), FileDrop As String, FilePath As String, FileName As String, FileExtension As String
     Dim MwsrFileIn As String, MwsrFileOut As String, MwsrLine As String, MwsrLabelName As String, MwsrLabelNameNew As String
     Dim TestIfExist As String, BatchFile As String, FilesInDir As String, FileNameTxtbox As String
     Dim foundFileExtension As String, foundFileReadOnly As System.IO.FileInfo
@@ -77,8 +77,8 @@ Public Class Form1
         'Note we can't use Path.GetExtension() because it handles files with multiple extensions incorrectly
         'Files with multiple extensions are probably more common in fields where we would use lazyrename than are random dots in the middle of a name.
         If InStr(FileName, ".") <> 0 Then
+            FileExtension = VB.Right(FileName, VB.Len(FileName) - InStr(FileName, ".") + 1)
             FileName = VB.Left(FileName, InStr(FileName, ".") - 1) 'Do we really need this variable, or could we work directly with txtNewName.Text?
-            FileExtension = VB.Right(FileDrop, VB.Len(FileDrop) - InStrRev(FileDrop, ".") + 1)
         End If
         'Updates gui
         lblFile.BackColor = Color.WhiteSmoke
@@ -91,7 +91,7 @@ Public Class Form1
     End Sub
     Private Sub lblFile_DragDrop(ByVal sender As Object, ByVal e As System.Windows.Forms.DragEventArgs) Handles lblFile.DragDrop
         'Get label text from file drag-and-dropped onto window
-        Dim fila As String() = CType(e.Data.GetData(DataFormats.FileDrop), String())
+        fila = CType(e.Data.GetData(DataFormats.FileDrop), String())
         lblLoad_File(fila)
         Me.Activate()
     End Sub
@@ -175,12 +175,9 @@ Public Class Form1
             If VB.Right(foundFile, 4) = "#tmp" Then Rename(foundFile, VB.Left(foundFile, VB.Len(foundFile) - 4))
         Next
         'Updates the FileName variable
-        FileName = txtNewName.Text
+        fila(0) = FilePath & txtNewName.Text & FileExtension
         'Updates Gui
-        lblFile.Text = FilePath & txtNewName.Text & FileExtension
-        lblFile.BackColor = Color.WhiteSmoke
-        Buttons_Disable()
-        txtNewName.Focus()
+        lblLoad_File(fila)
         Exit Sub
 100:    'Jumps here when "On Error" occurs
         lblFile.Text = "One or more of the associated files appears to be in use by another program. Close the file and try again."
