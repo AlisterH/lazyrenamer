@@ -193,6 +193,7 @@ Public Class Form1
             FilesInDir = VB.Left(foundFile, InStr(foundFile, ".") - 1)
             foundFileExtension = VB.Right(foundFile, VB.Len(foundFile) - InStr(foundFile, ".") + 1)
         End If
+        'ToDo: Should move this test to before we start trying to CopyOrRename files for improved performance
         If FileNameTxtbox <> FileName Then 'Q - is this test really needed? A - it won't be once we process _pasted_ text (instead of only typed text).
             If FilesInDir = FileName Then 'need to be case sensitive here as it might not be a windows filesystem (see note 2 at top)
                 If Copy_TrueFalse = False Then
