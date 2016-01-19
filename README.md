@@ -1,8 +1,8 @@
 **Version 1.2, March 2012 - many fixes and enhancements, including support for Linux**
 
-[[/SupportFiles/LazyRenamer_screenshot_0.PNG]] [[/SupportFiles/LazyRenamer_screenshot_2.PNG]] [[/SupportFiles/LazyRenamer_screenshot_1.PNG]] [[/SupportFiles/LazyRenamer_screenshot_3.PNG]]
+[[./SupportFiles/LazyRenamer_screenshot_0.PNG]] [[./SupportFiles/LazyRenamer_screenshot_2.PNG]] [[./SupportFiles/LazyRenamer_screenshot_1.PNG]] [[./SupportFiles/LazyRenamer_screenshot_3.PNG]]
 
-[[/SupportFiles/files_screenshot_0.PNG]] [[/SupportFiles/files_screenshot_1.PNG]]
+[[./SupportFiles/files_screenshot_0.PNG]] [[./SupportFiles/files_screenshot_1.PNG]]
 
 LazyRenamer is a tool for renaming or copying a group of associated files.
 For example, if you have a bundle of files called:
