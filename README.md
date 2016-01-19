@@ -1,7 +1,8 @@
 **Version 1.2, March 2012 - many fixes and enhancements, including support for Linux**
 
-http://lazyrenamer.googlecode.com/svn/SupportFiles/LazyRenamer_screenshot_0.PNG http://lazyrenamer.googlecode.com/svn/SupportFiles/LazyRenamer_screenshot_2.PNG http://lazyrenamer.googlecode.com/svn/SupportFiles/LazyRenamer_screenshot_1.PNG http://lazyrenamer.googlecode.com/svn/SupportFiles/LazyRenamer_screenshot_3.PNG
-http://lazyrenamer.googlecode.com/svn/SupportFiles/files_screenshot_0.PNG http://lazyrenamer.googlecode.com/svn/SupportFiles/files_screenshot_1.PNG
+[[/SupportFiles/LazyRenamer_screenshot_0.PNG]] [[/SupportFiles/LazyRenamer_screenshot_2.PNG]] [[/SupportFiles/LazyRenamer_screenshot_1.PNG]] [[/SupportFiles/LazyRenamer_screenshot_3.PNG]]
+
+[[/SupportFiles/files_screenshot_0.PNG]] [[/SupportFiles/files_screenshot_1.PNG]]
 
 LazyRenamer is a tool for renaming or copying a group of associated files.
 For example, if you have a bundle of files called:
@@ -50,7 +51,7 @@ Either the open source and cross platform Mono runtime OR Microsoft .NET Framewo
 - Does not validate the new name when you paste into it, or use cut or undo via the mouse.
 
 For more details, or new issues check
-http://code.google.com/p/lazyrenamer/issues/list?q=label:Type-Defect
+https://github.com/AlisterH/lazyrenamer/issues
 
 ---
 
