@@ -56,4 +56,4 @@ https://github.com/AlisterH/lazyrenamer/issues
 ---
 
 # New developers welcome #
-I don't have plans for a lot of improvements.  Patches are welcome and ask if you want to be added to the project.
+I don't have plans for a lot of improvements.  Pull requests or patches are welcome and ask if you want to be added to the project.
