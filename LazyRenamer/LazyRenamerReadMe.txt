@@ -4,7 +4,7 @@ LazyRenamer v1.2
 '    Copyright © Alister Hood, 2011, 2012
 '
 '    This file is part of LazyRenamer.
-'    http://code.google.com/p/lazyrenamer
+'    https://github.com/AlisterH/lazyrenamer
 '
 '    LazyRenamer is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -29,12 +29,12 @@ For example, if you have a bundle of files called:
    Land.shx
    Land.prj
    Land.mwsr
-   Land.lbl,
-To rename all the files at once simply drag one of them onto the program, type the new name, and press [enter].
-To copy all the files instead, press [tab] and then [enter].
+   Land.lbl
+To rename all the files at once simply drag one of them onto the program, type the new base name, and press [enter].
+To copy all the files instead of renaming, press [tab] and then [enter].
 As you type the new name LazyRenamer checks for existing files or directories with the same base name, to avoid any conflicts or confusion.
 
-Lazyrenamer can handle files with multiple extensions - useful when you have sets of files that keep growing like this:
+LazyRenamer can handle files with multiple extensions - useful when you have sets of files that keep growing like this:
    Sails.stc.dwh.01.bak
    Sails.stc.mdb
    Sails.stc.mdb.01.bak
@@ -64,9 +64,8 @@ Known Issues - version 1.2:
 - Does not validate the new name when you paste into it, or use cut or undo via the mouse. 
 
 For more details, or new issues check 
-http://code.google.com/p/lazyrenamer/issues/list?q=label:Type-Defect
+https://github.com/AlisterH/lazyrenamer/issues
 ----------------
 
-New developers wanted
-I am not really a developer, and this program isn't a priority for me, so I won't be doing a lot of improvements.
-Just ask if you want to be added to the project. 
+New developers welcome
+I don't have plans for a lot of improvements.  Patches are welcome and ask if you want to be added to the project.
