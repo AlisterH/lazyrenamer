@@ -1,7 +1,7 @@
 ﻿//    Copyright © Alister Hood, 2011, 2012
 //
 //    This file is part of LazyRenamer.
-//    http://code.google.com/p/lazyrenamer
+//    https://github.com/AlisterH/lazyrenamer
 //
 //    LazyRenamer is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
