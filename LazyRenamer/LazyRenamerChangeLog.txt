@@ -1,14 +1,20 @@
 ----------------
+LazyRenamer v1.3 highlights
+
+- Improvements to gui behaviour when there is an error renaming
+- Don't use temporary files (except for .mwsr): avoids bogus error when there is another file with #tmp suffix in the directory, and fixes .mwsr processing, which was broken.
+
+----------------
 LazyRenamer v1.2 highlights
 
 - Support for real operating systems (e.g. Linux) via Mono
-- save .ini file in the user's application data folder, instead of the working directory
-- accept a file as an input argument at startup (drag-and-drop onto LazyRenamer.exe)
-- only rename files with _case sensitively_ matching basenames, to prevent errors trying to rename two _case insensitively_ matching files to the same name
-- improvements to validation of entered filenames
-- rename matching folders as well as files
-- performance improvements for really slow environments
-- other minor improvements
+- Save .ini file in the user's application data folder, instead of the working directory
+- Accept a file as an input argument at startup (drag-and-drop onto LazyRenamer.exe)
+- Only rename files with _case sensitively_ matching basenames, to prevent errors trying to rename two _case insensitively_ matching files to the same name
+- Improvements to validation of entered filenames
+- Rename matching folders as well as files
+- Performance improvements for really slow environments
+- Other minor improvements
 
 
 ----------------
