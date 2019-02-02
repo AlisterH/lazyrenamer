@@ -104,21 +104,23 @@ Public Class Form1
         'Characters below are (in order): " * / \ : < > ? |
         If e.KeyChar = ChrW(34) Or e.KeyChar = ChrW(42) Or e.KeyChar = ChrW(47) Or e.KeyChar = ChrW(92) Or e.KeyChar = ChrW(58) Or e.KeyChar = ChrW(60) Or e.KeyChar = ChrW(62) Or e.KeyChar = ChrW(63) Or e.KeyChar = ChrW(124) Then e.Handled = True
     End Sub
-    Private Sub txtNewName_KeyUp(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles txtNewName.KeyUp
-        Buttons_Disable()
-        'disallow file base name that is blank or has trailing spaces, so we can rename a file with no extension reliably
-        'does not detect if the user "cuts" the whole file name!
-        If Trim(VB.Right(txtNewName.Text, 1)) = "" Then Exit Sub
-        For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
-            'disallow file base name if a file with the same base name (and any extension) already exists
-            If check_NewName(foundFile) = False Then Exit Sub
-        Next
-        For Each foundFile As String In My.Computer.FileSystem.GetDirectories(FilePath)
-            'disallow file base name if a folder with the same base name (and any extension) already exists
-            If check_NewName(foundFile) = False Then Exit Sub
-        Next
-        btnRename.Enabled = True
-        btnCopy.Enabled = True
+    Private Sub txtNewName_TextChanged(sender As Object, e As EventArgs) Handles txtNewName.TextChanged
+        If txtNewName.Enabled = "True" Then
+            Buttons_Disable()
+            'disallow file base name that is blank or has trailing spaces, so we can rename a file with no extension reliably
+            'does not detect if the user "cuts" the whole file name!
+            If Trim(VB.Right(txtNewName.Text, 1)) = "" Then Exit Sub
+            For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
+                'disallow file base name if a file with the same base name (and any extension) already exists
+                If check_NewName(foundFile) = False Then Exit Sub
+            Next
+            For Each foundFile As String In My.Computer.FileSystem.GetDirectories(FilePath)
+                'disallow file base name if a folder with the same base name (and any extension) already exists
+                If check_NewName(foundFile) = False Then Exit Sub
+            Next
+            btnRename.Enabled = True
+            btnCopy.Enabled = True
+        End If
     End Sub
     Private Function check_NewName(ByVal foundFile As String) As Boolean
         FilesInDir = Path.GetFileName(foundFile)
