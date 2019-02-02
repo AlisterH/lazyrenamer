@@ -1,7 +1,7 @@
-LazyRenamer v1.2
+LazyRenamer v1.3
 
 ----------------
-'    Copyright © Alister Hood, 2011, 2012
+'    Copyright © Alister Hood, 2011, 2012, 2019
 '
 '    This file is part of LazyRenamer.
 '    https://github.com/AlisterH/lazyrenamer
@@ -57,11 +57,10 @@ Either the open source and cross platform Mono runtime OR Microsoft .NET Framewo
 
 
 ----------------
-Known Issues - version 1.2:
+Known Issues - version 1.3:
 
 - Does not detect name clashes due to files created after you type the new name and before you click "copy" or "rename"
 - Does not report if the file has been removed before you click "copy" or "rename"
-- Does not validate the new name when you paste into it, or use cut or undo via the mouse. 
 
 For more details, or new issues check 
 https://github.com/AlisterH/lazyrenamer/issues
