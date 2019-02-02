@@ -22,7 +22,7 @@
 ' We partly cater to this lowest-common-denominator behaviour:
 ' e.g. we won't allow creating "test.*" if "Test.*" exists
 ' Note 2: But since version 1.2 we only rename or copy the files with basenames which match the selected file _case sensitively_.
-' This is because otherwise we fail if the set of files we are renaming includes two files that only differ by the case of some characters
+' This is because otherwise we would fail if the set of files we are renaming includes two files that only differ by the case of some characters
 ' e.g. we would try to give the same new name to both "test.shp" and "Test.shp"
 ' On Windows this situation is unlikely but possible e.g. accessing files on a Samba server which were named from a Linux system.
 
@@ -86,7 +86,7 @@ Public Class Form1
         txtNewName.Enabled = True
         txtNewName.Text = FileName
         lblFile.Focus() 'hack: if a file is dropped onto lazyrename twice we need to unfocus txtNewName before focusing it, so that the filename is selected
-        txtNewName.Focus() 'maybe we should also select the filename after renaming or copying
+        txtNewName.Focus() 'maybe we should also select the filename after renaming or copying; 2019: it looks like it is fine as it is currently
         Buttons_Disable()
     End Sub
     Private Sub lblFile_DragDrop(ByVal sender As Object, ByVal e As System.Windows.Forms.DragEventArgs) Handles lblFile.DragDrop
@@ -117,6 +117,8 @@ Public Class Form1
             'disallow file base name if a folder with the same base name (and any extension) already exists
             If check_NewName(foundFile) = False Then Exit Sub
         Next
+        'A possible edge case is if there is both filename.extension and filename.extension#tmp
+        'I tested and it didn't cause a problem, but I haven't checked to see whether that will always be the case.
         btnRename.Enabled = True
         btnCopy.Enabled = True
     End Sub
@@ -135,6 +137,14 @@ Public Class Form1
     Private Sub btn_Click(ByVal Copy_TrueFalse As Boolean)
         FileNameTxtbox = Path.GetFileName(txtNewName.Text) ' Why do we need this variable?
         On Error GoTo 100   'If file we try to rename is in use by another program
+        txtNewName.Enabled = False 'In case of error it makes sense for this to be disabled so that only the rename/copy button is available to continue the operation.
+        'Disable the button we didn't click - in case of error it makes sense that only the one we clicked should be available to continue the operation.
+        'It would be better to replace it with a "cancel" button which would revert any changes
+        If Copy_TrueFalse = True Then
+            btnRename.Enabled = False
+        Else
+            btnCopy.Enabled = False
+        End If
         'Renames or Copies all associated files
         For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
             foundFile = Path.GetFileName(foundFile)
@@ -146,6 +156,8 @@ Public Class Form1
             CopyOrRename(foundFile, Copy_TrueFalse, True)
         Next
         'Updates the Layer Name value in MapWindow layer properties files
+        'This is old code and not really maintained as I don't really care about MapWindow
+        'I guess an existing .mwsr2 will cause a problem, and filename.something.mwsr wouldn't be detected
         MwsrFileIn = FilePath & txtNewName.Text & ".mwsr"
         If File.Exists(MwsrFileIn) Then
             foundFileReadOnly = My.Computer.FileSystem.GetFileInfo(MwsrFileIn)
@@ -180,6 +192,7 @@ Public Class Form1
         lblLoad_File(fila)
         Exit Sub
 100:    'Jumps here when "On Error" occurs
+        'We currently rely on the user to remember the name of the files they are trying to rename, so they can close them and try again.
         lblFile.Text = "One or more of the associated files appears to be in use by another program. Close the file and try again."
         lblFile.BackColor = Color.LavenderBlush
         'Should we restore any files with a #tmp to their original filenames if there has been an error?
@@ -197,7 +210,7 @@ Public Class Form1
         If FileNameTxtbox <> FileName Then 'Q - is this test really needed? A - it won't be once we process _pasted_ text (instead of only typed text).
             If FilesInDir = FileName Then 'need to be case sensitive here as it might not be a windows filesystem (see note 2 at top)
                 If Copy_TrueFalse = False Then
-                    Rename(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp") 'Is the #tmp really wise?
+                    Rename(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp") 'Is the #tmp really wise or necessary?
                 Else
                     If (IsDirectory = False) Then
                         My.Computer.FileSystem.CopyFile(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp") 'Is the #tmp really wise?  Is it needed for copying as well as renaming?
