@@ -1,6 +1,7 @@
 ----------------
 LazyRenamer v1.3 highlights
 
+- Validate new name when using cut, paste or undo via the right-click menu
 - Improvements to gui behaviour when there is an error renaming
 - Don't use temporary files (except for .mwsr): avoids bogus error when there is another file with #tmp suffix in the directory, and fixes .mwsr processing, which was broken.
 
