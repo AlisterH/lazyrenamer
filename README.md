@@ -1,4 +1,5 @@
 **Version 1.2, March 2012 - many fixes and enhancements, including support for Linux**
+**Version 1.3, February 2019 - minor fixes including validating the new name when you use cut, paste or undo via the right-click menu**
 
 ![](SupportFiles/LazyRenamer_screenshot_0.PNG) ![](SupportFiles/LazyRenamer_screenshot_2.PNG) ![](SupportFiles/LazyRenamer_screenshot_1.PNG) ![](SupportFiles/LazyRenamer_screenshot_3.PNG)
 
@@ -43,12 +44,10 @@ Either the open source and cross platform Mono runtime OR Microsoft .NET Framewo
 
 ---
 
-# Known Issues - version 1.2 #
+# Known Issues - version 1.3 #
 - Does not detect name clashes due to files created after you type the new name and before you click "copy" or "rename"
 
 - Does not report if the file was removed before you click "copy" or "rename"
-
-- Does not validate the new name when you paste into it, or use cut or undo via the mouse.
 
 For more details, or new issues check
 https://github.com/AlisterH/lazyrenamer/issues
