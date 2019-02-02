@@ -117,8 +117,6 @@ Public Class Form1
             'disallow file base name if a folder with the same base name (and any extension) already exists
             If check_NewName(foundFile) = False Then Exit Sub
         Next
-        'A possible edge case is if there is both filename.extension and filename.extension#tmp
-        'I tested and it didn't cause a problem, but I haven't checked to see whether that will always be the case.
         btnRename.Enabled = True
         btnCopy.Enabled = True
     End Sub
@@ -158,7 +156,7 @@ Public Class Form1
         'Updates the Layer Name value in MapWindow layer properties files
         'This is old code and not really maintained as I don't really care about MapWindow
         'I guess an existing .mwsr2 will cause a problem, and filename.something.mwsr wouldn't be detected
-        MwsrFileIn = FilePath & txtNewName.Text & ".mwsr"
+        MwsrFileIn = FilePath & FileNameTxtbox & ".mwsr"
         If File.Exists(MwsrFileIn) Then
             foundFileReadOnly = My.Computer.FileSystem.GetFileInfo(MwsrFileIn)
             If foundFileReadOnly.IsReadOnly = False Then
@@ -176,16 +174,7 @@ Public Class Form1
                 File.Delete(MwsrFileIn)
                 Rename(MwsrFileOut, VB.Left(MwsrFileOut, VB.Len(MwsrFileOut) - 1))
             End If
-            'Deletes old file as we seem to have been successful
-            If File.Exists(MwsrFileOut) = True Then File.Delete(MwsrFileIn)
         End If
-        'Removes #tmp as we seem to have been successful
-        For Each foundFile As String In My.Computer.FileSystem.GetFiles(FilePath)
-            If VB.Right(foundFile, 4) = "#tmp" Then Rename(foundFile, VB.Left(foundFile, VB.Len(foundFile) - 4))
-        Next
-        For Each foundFile As String In My.Computer.FileSystem.GetDirectories(FilePath)
-            If VB.Right(foundFile, 4) = "#tmp" Then Rename(foundFile, VB.Left(foundFile, VB.Len(foundFile) - 4))
-        Next
         'Updates the FileName variable
         fila(0) = FilePath & txtNewName.Text & FileExtension
         'Updates Gui
@@ -193,9 +182,9 @@ Public Class Form1
         Exit Sub
 100:    'Jumps here when "On Error" occurs
         'We currently rely on the user to remember the name of the files they are trying to rename, so they can close them and try again.
-        lblFile.Text = "One or more of the associated files appears to be in use by another program. Close the file and try again."
+        lblFile.Text = "One or more of the associated files appears to be in use by another program so was not renamed." & System.Environment.NewLine & "Close the file and try again."
         lblFile.BackColor = Color.LavenderBlush
-        'Should we restore any files with a #tmp to their original filenames if there has been an error?
+        'Should we restore any files that were successfully renamed back to their original filenames if there has been an error?
         'At the moment the user can close any files in use and click rename again to finish the failed attempt.  This is better in a way.
     End Sub
     Private Sub CopyOrRename(ByVal foundFile As String, ByVal Copy_TrueFalse As Boolean, ByVal IsDirectory As Boolean)
@@ -210,12 +199,12 @@ Public Class Form1
         If FileNameTxtbox <> FileName Then 'Q - is this test really needed? A - it won't be once we process _pasted_ text (instead of only typed text).
             If FilesInDir = FileName Then 'need to be case sensitive here as it might not be a windows filesystem (see note 2 at top)
                 If Copy_TrueFalse = False Then
-                    Rename(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp") 'Is the #tmp really wise or necessary?
+                    Rename(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension)
                 Else
                     If (IsDirectory = False) Then
-                        My.Computer.FileSystem.CopyFile(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp") 'Is the #tmp really wise?  Is it needed for copying as well as renaming?
+                        My.Computer.FileSystem.CopyFile(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension)
                     Else
-                        My.Computer.FileSystem.CopyDirectory(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension & "#tmp") 'Is the #tmp really wise?  Is it needed for copying as well as renaming?
+                        My.Computer.FileSystem.CopyDirectory(FilePath & foundFile, FilePath & FileNameTxtbox & foundFileExtension)
                     End If
                 End If
             End If
