@@ -1,3 +1,10 @@
+<!--
+  Title: Lazyrenamer
+  Description: LazyRenamer is a tool for renaming or copying a group of associated files.
+  -->
+
+# Lazyrenamer #
+
 **Version 1.2, March 2012 - many fixes and enhancements, including support for Linux**
 
 **Version 1.3, February 2019 - minor fixes including validating the new name when you use cut, paste or undo via the right-click menu**
